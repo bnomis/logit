@@ -1,6 +1,4 @@
 #! /usr/bin/env python
-from __future__ import annotations
-
 import contextlib
 import sys
 import warnings
@@ -8,6 +6,7 @@ import warnings
 from loguru import logger
 
 import logit.log
+import logit.some_lib
 import logit.unwanted
 import logit.wanted
 
@@ -31,6 +30,7 @@ def test_logger():
         test_log_messages()
         logit.wanted.func()
         logit.unwanted.func()
+        logit.some_lib.func()
 
 
 def main():

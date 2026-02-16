@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import inspect
 import logging
 import logging.config
@@ -87,6 +85,7 @@ def config_logger_default() -> None:
     datefmt = '%Y-%m-%d %H:%M:%S'
     config = {
         'version': 1,
+        'disable_existing_loggers': False,
         'formatters': {
             'default': {
                 'datefmt': datefmt,
@@ -107,9 +106,7 @@ def config_logger_default() -> None:
             },
         },
         'root': {
-            'handlers': [
-                'loguru',
-            ],
+            'handlers': default_handlers,
             'level': 'DEBUG',
         },
         'loggers': {
