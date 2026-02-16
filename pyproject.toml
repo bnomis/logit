@@ -1,0 +1,61 @@
+[project]
+name = "logit"
+version = "0.1.0"
+description = "Testing loguru and logging"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "joblib>=1.5.3",
+    "loguru>=0.7.3",
+]
+
+
+[tool.ruff]
+line-length = 160
+
+
+[tool.ruff.format]
+quote-style = 'single'
+
+
+[tool.ruff.lint]
+# B: flake8-bugbear
+# E: pycodestyle
+# F: Pyflakes
+# I: isort
+# SIM: flake8-simplify
+# UP: pyupgrade
+select = [
+    'B',
+    'E',
+    'F',
+    'I',
+    'SIM',
+    "NPY201",
+    # 'UP',
+]
+# ignore
+# E501 (line length violations)
+# E722 Do not use bare `except`
+# SIM108 Use ternary operator
+ignore = ['E501', 'E722', 'SIM108']
+
+[tool.ruff.lint.isort]
+combine-as-imports = true
+known-first-party = []
+known-third-party = ['loguru']
+
+[tool.pyright]
+reportAny = false
+reportArgumentType = false
+reportExplicitAny = false
+reportGeneralTypeIssues = false
+reportMissingTypeArgument = false
+reportMissingTypeStubs = false
+reportOptionalSubscript = false
+reportUnknownArgumentType = false
+reportUnknownMemberType = false
+reportUnknownParameterType = false
+reportUnknownVariableType = false
+reportUnusedCallResult = false
+reportUnannotatedClassAttribute = false
