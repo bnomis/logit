@@ -15,3 +15,9 @@ def func():
     print('This is a print message to stderr from wanted.py', file=sys.stderr)
     warnings.warn('This is a warnings.warn message from wanted.py', DeprecationWarning, stacklevel=0)
     warnings.showwarning('This is a warnings.showwarning message from wanted.py', DeprecationWarning, 'wanted.py', 19)
+
+    try:
+        logger.info('Rasising an exception in wanted.py')
+        raise ValueError('This is a test exception from wanted.py')
+    except ValueError as e:
+        logger.exception(f'Caught an exception in wanted.py: {e}')

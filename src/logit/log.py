@@ -1,6 +1,7 @@
 import inspect
 import logging
 import logging.config
+import os
 import pathlib
 import sys
 import warnings
@@ -157,37 +158,45 @@ def log_dir() -> pathlib.Path:
     return this_dir().parent.parent / 'log'
 
 
-def log_file() -> pathlib.Path:
+def log_file(subprocess: bool = False) -> pathlib.Path:
+    if subprocess:
+        return log_dir() / f'log-{os.getpid()}.log'
     return log_dir() / 'log.log'
 
 
-def jsonl_file() -> pathlib.Path:
+def jsonl_file(subprocess: bool = False) -> pathlib.Path:
+    if subprocess:
+        return log_dir() / f'log-{os.getpid()}.jsonl'
     return log_dir() / 'log.jsonl'
 
 
-def setup_logger():
+def setup_logger(subprocess: bool = False):
+    # remove all handlers
+    logger.remove()
+
     take_over_logging()
     setup_warnings()
 
-    # remove all handlers
-    logger.remove()
     # dont need to take over stdout
     # logger.add(sys.__stdout__)
     # terminal/stderr
     logger.add(  # pyright: ignore[reportCallIssue]
         sys.__stderr__,
-        format='{time:YYYY-MM-DDTHH:mm:ss!UTC} <level>{level: <8}</level> {file}:{line}/{function} {message}',
+        format='{time:YYYY-MM-DDTHH:mm:ss!UTC} <level>{level: <8}</level> {process.id} {file}:{line}/{function} {message}',
+        enqueue=True,
     )
     # log to file
     logger.add(
-        log_file(),
+        log_file(subprocess=subprocess),
         format='{time:YYYY-MM-DDTHH:mm:ss!UTC} {level: <8} {file}:{line}/{function} {message}',
+        enqueue=True,
     )
     # log to jsonl
     logger.add(
-        jsonl_file(),
+        jsonl_file(subprocess=subprocess),
         format='{time:YYYY-MM-DDTHH:mm:ss!UTC} {level: <8} {file}:{line}/{function} {message}',
         serialize=True,
+        enqueue=True,
     )
     # disable print messages from unwanted.py
     logger.disable('logit.unwanted')
