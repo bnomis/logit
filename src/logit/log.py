@@ -182,7 +182,7 @@ def setup_logger(subprocess: bool = False):
     # terminal/stderr
     logger.add(  # pyright: ignore[reportCallIssue]
         sys.__stderr__,
-        format='{time:YYYY-MM-DDTHH:mm:ss!UTC} <level>{level: <8}</level> {process.id} {file}:{line}/{function} {message}',
+        format='{time:YYYY-MM-DDTHH:mm:ss!UTC} <level>{level: <8}</level> {process.id} {thread.id} {file}:{line}/{function} {message}',
         enqueue=True,
     )
     # log to file

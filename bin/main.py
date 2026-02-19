@@ -1,6 +1,8 @@
 #! /usr/bin/env python
 import contextlib
+import multiprocessing
 import sys
+import threading
 import warnings
 
 import joblib
@@ -39,9 +41,31 @@ def subprocess_entrypoint():
     loguru.logger.complete()
 
 
-def test_subprocesses():
+def test_joblib():
     loguru.logger.info('Testing subprocesses...')
     joblib.Parallel(n_jobs=2)(joblib.delayed(subprocess_entrypoint)() for _ in range(2))
+
+
+def test_multiprocessing():
+    loguru.logger.info('Testing multiprocessing subprocesses...')
+    processes = []
+    for _ in range(2):
+        p = multiprocessing.Process(target=subprocess_entrypoint)
+        p.start()
+        processes.append(p)
+    for p in processes:
+        p.join()
+
+
+def test_threads():
+    loguru.logger.info('Testing threads...')
+    threads = []
+    for _ in range(2):
+        t = threading.Thread(target=test_logs)
+        t.start()
+        threads.append(t)
+    for t in threads:
+        t.join()
 
 
 def test_logs():
@@ -56,7 +80,9 @@ def test_logger():
     stderr_stream = logit.log.StreamToLogger(level='ERROR')
     with contextlib.redirect_stdout(stdout_stream), contextlib.redirect_stderr(stderr_stream):
         test_logs()
-        test_subprocesses()
+        test_joblib()
+        test_multiprocessing()
+        test_threads()
 
 
 def main():
