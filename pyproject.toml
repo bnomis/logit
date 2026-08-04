@@ -1,7 +1,7 @@
 [project]
 name = "logit"
 version = "0.1.0"
-description = "Testing loguru and logging"
+description = "A loguru wrapper."
 readme = "README.md"
 requires-python = ">=3.14"
 dependencies = ["loguru>=0.7.3"]

@@ -37,8 +37,10 @@ The core logging architecture is in [src/logit/base.py](src/logit/base.py):
 
 ### Module Structure
 
+- [src/logit/__init__.py](src/logit/__init__.py): public API re-exports (`__all__`)
 - [src/logit/base.py](src/logit/base.py): Core logging setup and configuration
 - [bin/demo-logging.py](bin/demo-logging.py): visual demo of every capture path, run via [bin/demo-logging.sh](bin/demo-logging.sh)
+- [src/tests/conftest.py](src/tests/conftest.py): `capture` and `setup` fixtures shared across the test suite
 - [src/tests/emitters/](src/tests/emitters): modules that emit on every capture path, used as test subjects
 - [src/tests/fixtures/base.py](src/tests/fixtures/base.py): `LogCapture`, which reads the sinks back for assertions
 
@@ -67,6 +69,13 @@ source bin/activate.sh
 pytest -m "not slow"    # fast suite
 pytest -m slow          # forking tests
 ```
+
+## Tools and Libraries
+
+- [loguru](https://loguru.readthedocs.io/en/stable/): the logging library this project wraps
+- [joblib](https://joblib.readthedocs.io/en/stable/): dev dependency, used by `bin/demo-logging.py` and `src/tests/test_concurrency.py` to demonstrate/exercise per-process logging
+- [pytest](https://docs.pytest.org/en/stable/): test runner
+- [uv](https://docs.astral.sh/uv/): package and virtual environment management
 
 ## Key Implementation Details
 

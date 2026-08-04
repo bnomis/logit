@@ -407,7 +407,7 @@ from `__all__`. No task needs further human input.
 
 ## Task 14: Bring the documentation in line with the code
 
-**Status:** todo
+**Status:** done
 **Priority:** medium
 **Complexity:** medium
 **Source Reference:** Findings "README does not describe the project or its API" (Doc3) and "AGENTS.md structure and library gaps" (Doc1 / Doc2)
@@ -416,20 +416,20 @@ from `__all__`. No task needs further human input.
 
 **Subtasks:**
 
-- [ ] Settle one description and propagate it to `README.md:3`, `AGENTS.md:3` and `pyproject.toml:4` (currently "A test of using loguru for logging" / "A loguru wrapper" / "Testing loguru and logging")
-- [ ] Add a README usage section: install, `logit.setup_logger(directory=..., stderr=..., disabled=[...], subprocess=...)`, what each of the three sinks contains and where it lands, the `disabled` mechanism, `StreamToLogger` for `print()` capture, and `reset()`
-- [ ] Document the `subprocess=True` per-pid file mode and when to use it
-- [ ] Mention `bin/demo-logging.sh` and how to run it (including the dev-group dependency on joblib)
-- [ ] Add `src/logit/__init__.py` and `src/tests/conftest.py` to AGENTS.md's Module Structure list
-- [ ] Add a short "Tools and libraries" section to AGENTS.md naming loguru, joblib, pytest and uv
-- [ ] Keep to ASCII punctuation per the markdown rules
+- [x] Settle one description and propagate it to `README.md:3`, `AGENTS.md:3` and `pyproject.toml:4` (currently "A test of using loguru for logging" / "A loguru wrapper" / "Testing loguru and logging")
+- [x] Add a README usage section: install, `logit.setup_logger(directory=..., stderr=..., disabled=[...], subprocess=...)`, what each of the three sinks contains and where it lands, the `disabled` mechanism, `StreamToLogger` for `print()` capture, and `reset()`
+- [x] Document the `subprocess=True` per-pid file mode and when to use it
+- [x] Mention `bin/demo-logging.sh` and how to run it (including the dev-group dependency on joblib)
+- [x] Add `src/logit/__init__.py` and `src/tests/conftest.py` to AGENTS.md's Module Structure list
+- [x] Add a short "Tools and libraries" section to AGENTS.md naming loguru, joblib, pytest and uv
+- [x] Keep to ASCII punctuation per the markdown rules
 
 **Acceptance Criteria:**
 
-- [ ] All three description strings agree
-- [ ] Every symbol in `logit.__all__` appears in the README
-- [ ] AGENTS.md's Module Structure list matches `find src bin -name '*.py'`
-- [ ] `pre-commit run --all-files` passes
+- [x] All three description strings agree
+- [x] Every symbol in `logit.__all__` appears in the README
+- [x] AGENTS.md's Module Structure list matches `find src bin -name '*.py'`
+- [x] `pre-commit run --all-files` passes
 
 **Notes:**
 
