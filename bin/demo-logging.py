@@ -21,7 +21,7 @@ import tests.emitters.wanted
 DISABLED = ['tests.emitters.unwanted']
 
 
-def log_messages():
+def log_messages() -> None:
     loguru.logger.debug('This is a debug message from demo-logging.py')
     loguru.logger.info('This is an info message from demo-logging.py')
     loguru.logger.warning('This is a warning message from demo-logging.py')
@@ -39,14 +39,14 @@ def log_messages():
         loguru.logger.exception(f'Caught an exception in demo-logging.py: {e}')
 
 
-def emit_all():
+def emit_all() -> None:
     log_messages()
     tests.emitters.wanted.func()
     tests.emitters.unwanted.func()
     tests.emitters.some_lib.func()
 
 
-def subprocess_entrypoint():
+def subprocess_entrypoint() -> None:
     logit.setup_logger(disabled=DISABLED, subprocess=True)
     stdout_stream = logit.StreamToLogger(level='INFO')
     stderr_stream = logit.StreamToLogger(level='ERROR')
@@ -55,12 +55,12 @@ def subprocess_entrypoint():
     loguru.logger.complete()
 
 
-def demo_joblib():
+def demo_joblib() -> None:
     loguru.logger.info('Testing subprocesses...')
     joblib.Parallel(n_jobs=2)(joblib.delayed(subprocess_entrypoint)() for _ in range(2))
 
 
-def demo_multiprocessing():
+def demo_multiprocessing() -> None:
     loguru.logger.info('Testing multiprocessing subprocesses...')
     processes = []
     for _ in range(2):
@@ -71,7 +71,7 @@ def demo_multiprocessing():
         p.join()
 
 
-def demo_threads():
+def demo_threads() -> None:
     loguru.logger.info('Testing threads...')
     threads = []
     for _ in range(2):
@@ -82,7 +82,7 @@ def demo_threads():
         t.join()
 
 
-def main():
+def main() -> None:
     logit.setup_logger(disabled=DISABLED)
     stdout_stream = logit.StreamToLogger(level='INFO')
     stderr_stream = logit.StreamToLogger(level='ERROR')

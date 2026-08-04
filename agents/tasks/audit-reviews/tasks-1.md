@@ -194,7 +194,7 @@ from `__all__`. No task needs further human input.
 
 ## Task 7: Annotate the package and demo signatures
 
-**Status:** todo
+**Status:** done
 **Priority:** medium
 **Complexity:** small
 **Source Reference:** Finding "missing type annotations across the tree" (S1) - package and `bin/` portion
@@ -203,16 +203,16 @@ from `__all__`. No task needs further human input.
 
 **Subtasks:**
 
-- [ ] `src/logit/base.py:46` `showwarning` - annotate all six parameters and `-> None`, mirroring `warnings.showwarning`'s signature (`message: Warning | str`, `category: type[Warning]`, `filename: str`, `lineno: int`, `file: typing.TextIO | None`, `line: str | None`)
-- [ ] `src/logit/base.py:147,150,154` - annotate `StreamToLogger.__init__`, `write` and `flush`
-- [ ] `bin/demo-logging.py:24,42,49,58,63,74,85` - add `-> None` to all seven functions
-- [ ] Run `ruff check && ruff format --check`
+- [x] `src/logit/base.py:46` `showwarning` - annotate all six parameters and `-> None`, mirroring `warnings.showwarning`'s signature (`message: Warning | str`, `category: type[Warning]`, `filename: str`, `lineno: int`, `file: typing.TextIO | None`, `line: str | None`)
+- [x] `src/logit/base.py:147,150,154` - annotate `StreamToLogger.__init__`, `write` and `flush`
+- [x] `bin/demo-logging.py:24,42,49,58,63,74,85` - add `-> None` to all seven functions
+- [x] Run `ruff check && ruff format --check`
 
 **Acceptance Criteria:**
 
-- [ ] An AST walk over `src/logit/` and `bin/` reports zero signatures missing parameter or return annotations
-- [ ] `pytest -m "not slow"` passes
-- [ ] `bin/demo-logging.sh` still runs end to end
+- [x] An AST walk over `src/logit/` and `bin/` reports zero signatures missing parameter or return annotations
+- [x] `pytest -m "not slow"` passes
+- [x] `bin/demo-logging.sh` still runs end to end
 
 **Notes:**
 

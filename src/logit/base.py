@@ -48,7 +48,14 @@ def internal_files() -> set[str]:
     return files
 
 
-def showwarning(message, category, filename, lineno, file=None, line=None):
+def showwarning(
+    message: Warning | str,
+    category: type[Warning],
+    filename: str,
+    lineno: int,
+    file: typing.TextIO | None = None,
+    line: str | None = None,
+) -> None:
     # Find caller from where originated the logged message.
     internal = internal_files()
     frame, depth = inspect.currentframe(), 0
@@ -159,14 +166,14 @@ def config_logger_default(disabled: list[str] | None = None) -> None:
 
 
 class StreamToLogger:
-    def __init__(self, level='DEBUG'):
+    def __init__(self, level: str = 'DEBUG') -> None:
         self.level = level
 
-    def write(self, buffer):
+    def write(self, buffer: str) -> None:
         for line in buffer.rstrip().splitlines():
             loguru.logger.opt(depth=1).log(self.level, line.rstrip())
 
-    def flush(self):
+    def flush(self) -> None:
         pass
 
 
