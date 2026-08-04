@@ -1,12 +1,14 @@
 import contextlib
-import io
 import json
-import pathlib
 import typing
 
 import loguru
 
 import logit
+
+if typing.TYPE_CHECKING:
+    import io
+    import pathlib
 
 
 class LogCapture:

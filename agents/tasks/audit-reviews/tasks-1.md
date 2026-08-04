@@ -164,7 +164,7 @@ from `__all__`. No task needs further human input.
 
 ## Task 6: Move annotation-only imports into TYPE_CHECKING blocks
 
-**Status:** todo
+**Status:** done
 **Priority:** low
 **Complexity:** small
 **Source Reference:** Finding "annotation-only imports outside TYPE_CHECKING" (S4)
@@ -173,21 +173,22 @@ from `__all__`. No task needs further human input.
 
 **Subtasks:**
 
-- [ ] `src/logit/base.py:8` - `typing` is used only in `stderr: typing.TextIO | None`; move it (keep `pathlib`, used at runtime by `this_dir`)
-- [ ] `src/tests/conftest.py:3,5` - move `pathlib` and `typing` (keep `io`, `logging`, `sys`, used at runtime)
-- [ ] `src/tests/fixtures/base.py:4,5` - move `pathlib` and `typing` (keep `io`, used at runtime by nothing but the annotation - verify before moving; `contextlib` and `json` stay)
-- [ ] Use the same idiom in all three files so a convention exists for the tree
+- [x] `src/logit/base.py:8` - `typing` is used only in `stderr: typing.TextIO | None`; move it (keep `pathlib`, used at runtime by `this_dir`)
+- [x] `src/tests/conftest.py:3,5` - move `pathlib` and `typing` (keep `io`, `logging`, `sys`, used at runtime)
+- [x] `src/tests/fixtures/base.py:4,5` - move `pathlib` and `typing` (keep `io`, used at runtime by nothing but the annotation - verify before moving; `contextlib` and `json` stay)
+- [x] Use the same idiom in all three files so a convention exists for the tree
 
 **Acceptance Criteria:**
 
-- [ ] Every remaining module-level import is referenced outside an annotation
-- [ ] `pytest -m "not slow"` passes (annotations are lazily evaluated on 3.14, so nothing should break)
-- [ ] `ruff check` is clean
+- [x] Every remaining module-level import is referenced outside an annotation
+- [x] `pytest -m "not slow"` passes (annotations are lazily evaluated on 3.14, so nothing should break)
+- [x] `ruff check` is clean
 
 **Notes:**
 
 - Depends on Task 5 (both touch the `base.py` import block)
 - Python 3.14 evaluates annotations lazily, so no `from __future__ import annotations` is needed - and the standard forbids adding it
+- Correction found during implementation: `import typing` cannot itself be moved into `if typing.TYPE_CHECKING:` in any of the three files - the guard's condition is `typing.TYPE_CHECKING`, so `typing` must already be imported unconditionally to write the guard at all. In `base.py`, `typing` is the only annotation-only import candidate, so there is nothing to guard and the import stays exactly as it was. In `conftest.py` and `fixtures/base.py`, `typing` stays unconditional (it both enables the guard and is itself used in annotations there), while `pathlib` (both files) and `io` (`fixtures/base.py` only, confirmed to have no runtime use beyond the `stderr: io.StringIO` annotation) move inside `if typing.TYPE_CHECKING:` blocks
 
 ---
 
