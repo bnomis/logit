@@ -1,11 +1,15 @@
 import inspect
 import sys
+import typing
 
 import logit
 import tests.emitters.wanted
 
+if typing.TYPE_CHECKING:
+    import tests.fixtures.base
 
-def test_print_becomes_an_info_record(capture):
+
+def test_print_becomes_an_info_record(capture: tests.fixtures.base.LogCapture) -> None:
     with capture.redirect():
         print('printed to stdout')
 
@@ -13,7 +17,7 @@ def test_print_becomes_an_info_record(capture):
     assert record['level']['name'] == 'INFO'
 
 
-def test_print_to_stderr_becomes_an_error_record(capture):
+def test_print_to_stderr_becomes_an_error_record(capture: tests.fixtures.base.LogCapture) -> None:
     with capture.redirect():
         print('printed to stderr', file=sys.stderr)
 
@@ -21,7 +25,7 @@ def test_print_to_stderr_becomes_an_error_record(capture):
     assert record['level']['name'] == 'ERROR'
 
 
-def test_stdout_and_stderr_are_separated_by_level(capture):
+def test_stdout_and_stderr_are_separated_by_level(capture: tests.fixtures.base.LogCapture) -> None:
     with capture.redirect():
         print('out one')
         print('err one', file=sys.stderr)
@@ -31,7 +35,7 @@ def test_stdout_and_stderr_are_separated_by_level(capture):
     assert levels == {'out one': 'INFO', 'err one': 'ERROR', 'out two': 'INFO'}
 
 
-def test_print_reaches_all_three_sinks(capture):
+def test_print_reaches_all_three_sinks(capture: tests.fixtures.base.LogCapture) -> None:
     with capture.redirect():
         print('print to every sink')
 
@@ -40,7 +44,7 @@ def test_print_reaches_all_three_sinks(capture):
     assert 'print to every sink' in capture.stderr()
 
 
-def test_print_is_attributed_to_the_calling_module(capture):
+def test_print_is_attributed_to_the_calling_module(capture: tests.fixtures.base.LogCapture) -> None:
     with capture.redirect():
         tests.emitters.wanted.func()
 
@@ -50,7 +54,7 @@ def test_print_is_attributed_to_the_calling_module(capture):
     assert record['function'] == 'func'
 
 
-def test_print_source_location_is_the_caller(capture):
+def test_print_source_location_is_the_caller(capture: tests.fixtures.base.LogCapture) -> None:
     with capture.redirect():
         expected_line = inspect.currentframe().f_lineno + 1
         print('locate this print')
@@ -61,14 +65,14 @@ def test_print_source_location_is_the_caller(capture):
     assert record['line'] == expected_line
 
 
-def test_multiline_write_becomes_one_record_per_line(capture):
+def test_multiline_write_becomes_one_record_per_line(capture: tests.fixtures.base.LogCapture) -> None:
     with capture.redirect():
         print('first\nsecond\nthird')
 
     assert capture.messages() == ['first', 'second', 'third']
 
 
-def test_bare_newline_produces_no_record(capture):
+def test_bare_newline_produces_no_record(capture: tests.fixtures.base.LogCapture) -> None:
     """print() writes its terminator separately; rstrip() must swallow it."""
     with capture.redirect():
         print('single line')
@@ -76,7 +80,7 @@ def test_bare_newline_produces_no_record(capture):
     assert capture.messages() == ['single line']
 
 
-def test_empty_and_whitespace_writes_produce_no_records(capture):
+def test_empty_and_whitespace_writes_produce_no_records(capture: tests.fixtures.base.LogCapture) -> None:
     stream = logit.StreamToLogger(level='INFO')
     stream.write('\n')
     stream.write('   \n\t')
@@ -85,20 +89,20 @@ def test_empty_and_whitespace_writes_produce_no_records(capture):
     assert capture.records() == []
 
 
-def test_trailing_whitespace_is_stripped_per_line(capture):
+def test_trailing_whitespace_is_stripped_per_line(capture: tests.fixtures.base.LogCapture) -> None:
     stream = logit.StreamToLogger(level='INFO')
     stream.write('padded   \nalso padded\t\n')
 
     assert capture.messages() == ['padded', 'also padded']
 
 
-def test_stream_level_is_configurable(capture):
+def test_stream_level_is_configurable(capture: tests.fixtures.base.LogCapture) -> None:
     logit.StreamToLogger(level='CRITICAL').write('urgent\n')
 
     assert capture.find('urgent')['level']['name'] == 'CRITICAL'
 
 
-def test_flush_is_a_noop(capture):
+def test_flush_is_a_noop(capture: tests.fixtures.base.LogCapture) -> None:
     stream = logit.StreamToLogger(level='INFO')
     stream.write('before flush\n')
     stream.flush()

@@ -224,7 +224,7 @@ from `__all__`. No task needs further human input.
 
 ## Task 8: Annotate the test and emitter signatures
 
-**Status:** todo
+**Status:** done
 **Priority:** low
 **Complexity:** medium
 **Source Reference:** Finding "missing type annotations across the tree" (S1) - test portion
@@ -233,15 +233,15 @@ from `__all__`. No task needs further human input.
 
 **Subtasks:**
 
-- [ ] `src/tests/emitters/{some_lib,unwanted,wanted}.py:8` - add `-> None` to `func`
-- [ ] Annotate every test function's fixture parameters and `-> None`: `capture: tests.fixtures.base.LogCapture`, `setup: typing.Callable[..., tests.fixtures.base.LogCapture]` (the types are already spelled out in `src/tests/conftest.py:14,39`)
-- [ ] Annotate parametrised arguments (`method`, `level`, `template`, `name`) and the `run_all` helper at `src/tests/test_selective.py:20`
-- [ ] Run `ruff check && ruff format --check`
+- [x] `src/tests/emitters/{some_lib,unwanted,wanted}.py:8` - add `-> None` to `func`
+- [x] Annotate every test function's fixture parameters and `-> None`: `capture: tests.fixtures.base.LogCapture`, `setup: typing.Callable[..., tests.fixtures.base.LogCapture]` (the types are already spelled out in `src/tests/conftest.py:14,39`)
+- [x] Annotate parametrised arguments (`method`, `level`, `template`, `name`) and the `run_all` helper at `src/tests/test_selective.py:20`
+- [x] Run `ruff check && ruff format --check`
 
 **Acceptance Criteria:**
 
-- [ ] An AST walk over `src/tests/` reports zero signatures missing parameter or return annotations
-- [ ] `pytest -m "not slow"` and `pytest -m slow` both pass
+- [x] An AST walk over `src/tests/` reports zero signatures missing parameter or return annotations
+- [x] `pytest -m "not slow"` and `pytest -m slow` both pass
 
 **Notes:**
 
