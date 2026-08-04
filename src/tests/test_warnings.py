@@ -1,7 +1,7 @@
 import inspect
 import warnings
 
-import logit.base
+import logit
 import tests.emitters.wanted
 
 
@@ -104,7 +104,7 @@ def test_explicit_line_argument_is_used_verbatim(capture):
 def test_setup_installs_the_hook_and_reset_restores_it(setup):
     original = warnings.showwarning
     setup()
-    assert warnings.showwarning is logit.base.showwarning
+    assert warnings.showwarning is logit.showwarning
 
-    logit.base.reset()
+    logit.reset()
     assert warnings.showwarning is original

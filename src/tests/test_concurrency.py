@@ -8,7 +8,7 @@ import joblib
 import loguru
 import pytest
 
-import logit.base
+import logit
 
 pytestmark = pytest.mark.slow
 
@@ -17,7 +17,7 @@ MESSAGES = 20
 
 def child_entrypoint(directory: str, label: str) -> None:
     """Runs in a forked/spawned child: sets up its own per-pid sinks."""
-    logit.base.setup_logger(directory=pathlib.Path(directory), subprocess=True)
+    logit.setup_logger(directory=pathlib.Path(directory), subprocess=True)
     for index in range(MESSAGES):
         loguru.logger.info(f'{label} {index}')
     loguru.logger.complete()

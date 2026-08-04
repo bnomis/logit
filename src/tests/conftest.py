@@ -6,7 +6,7 @@ import typing
 
 import pytest
 
-import logit.base
+import logit
 import tests.fixtures.base
 
 
@@ -20,7 +20,7 @@ def capture(tmp_path: pathlib.Path) -> typing.Generator[tests.fixtures.base.LogC
     stdout_, stderr_ = sys.stdout, sys.stderr
     handlers_ = logging.root.handlers[:]
     yield make_capture(tmp_path, io.StringIO())
-    logit.base.reset()
+    logit.reset()
     sys.stdout, sys.stderr = stdout_, stderr_
     logging.root.handlers[:] = handlers_
 
@@ -31,7 +31,7 @@ def make_capture(
     disabled: list[str] | None = None,
     subprocess: bool = False,
 ) -> tests.fixtures.base.LogCapture:
-    logit.base.setup_logger(directory=directory, stderr=stderr, disabled=disabled, subprocess=subprocess)
+    logit.setup_logger(directory=directory, stderr=stderr, disabled=disabled, subprocess=subprocess)
     return tests.fixtures.base.LogCapture(directory, stderr, subprocess=subprocess)
 
 
@@ -45,6 +45,6 @@ def setup(tmp_path: pathlib.Path) -> typing.Generator[typing.Callable[..., tests
         return make_capture(tmp_path, io.StringIO(), disabled=disabled, subprocess=subprocess)
 
     yield build
-    logit.base.reset()
+    logit.reset()
     sys.stdout, sys.stderr = stdout_, stderr_
     logging.root.handlers[:] = handlers_

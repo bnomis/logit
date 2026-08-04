@@ -17,16 +17,16 @@ showwarning_ = warnings.showwarning
 disabled_ = []
 
 
-def showwarning_orig(message, *args, **kwargs):
-    # Find caller from where originated the logged message.
-    frame, depth = inspect.currentframe(), 0
-    while frame and (depth == 0 or frame.f_code.co_filename == logging.__file__):
-        frame = frame.f_back
-        depth += 1
+# def showwarning_orig(message, *args, **kwargs):
+#     # Find caller from where originated the logged message.
+#     frame, depth = inspect.currentframe(), 0
+#     while frame and (depth == 0 or frame.f_code.co_filename == logging.__file__):
+#         frame = frame.f_back
+#         depth += 1
 
-    logger.opt(depth=depth).warning(message)
-    # logger.warning(message)
-    showwarning_(message, *args, **kwargs)
+#     logger.opt(depth=depth).warning(message)
+#     # logger.warning(message)
+#     showwarning_(message, *args, **kwargs)
 
 
 def internal_files() -> set[str]:

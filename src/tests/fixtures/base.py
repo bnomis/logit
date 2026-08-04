@@ -6,7 +6,7 @@ import typing
 
 import loguru
 
-import logit.base
+import logit
 
 
 class LogCapture:
@@ -27,7 +27,7 @@ class LogCapture:
 
     def records(self) -> list[dict]:
         self.complete()
-        path = logit.base.jsonl_file(directory=self.directory, subprocess=self.subprocess)
+        path = logit.jsonl_file(directory=self.directory, subprocess=self.subprocess)
         if not path.exists():
             return []
         return [json.loads(line)['record'] for line in path.read_text().splitlines() if line.strip()]
@@ -52,7 +52,7 @@ class LogCapture:
 
     def text(self) -> str:
         self.complete()
-        path = logit.base.log_file(directory=self.directory, subprocess=self.subprocess)
+        path = logit.log_file(directory=self.directory, subprocess=self.subprocess)
         return path.read_text() if path.exists() else ''
 
     def stderr(self) -> str:
@@ -62,7 +62,7 @@ class LogCapture:
     @contextlib.contextmanager
     def redirect(self) -> typing.Generator[None]:
         """Route print()/stdout/stderr through StreamToLogger, as the app does."""
-        out = logit.base.StreamToLogger(level='INFO')
-        err = logit.base.StreamToLogger(level='ERROR')
+        out = logit.StreamToLogger(level='INFO')
+        err = logit.StreamToLogger(level='ERROR')
         with contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):  # type: ignore
             yield

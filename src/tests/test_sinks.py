@@ -2,7 +2,7 @@ import os
 
 import loguru
 
-import logit.base
+import logit
 
 
 def test_record_reaches_all_three_sinks(capture):
@@ -52,8 +52,8 @@ def test_subprocess_mode_uses_per_pid_filenames(setup):
 
     assert capture.messages() == ['from a child']
 
-    log = logit.base.log_file(directory=capture.directory, subprocess=True)
-    jsonl = logit.base.jsonl_file(directory=capture.directory, subprocess=True)
+    log = logit.log_file(directory=capture.directory, subprocess=True)
+    jsonl = logit.jsonl_file(directory=capture.directory, subprocess=True)
     assert log.name == f'log-{os.getpid()}.log'
     assert jsonl.name == f'log-{os.getpid()}.jsonl'
     assert log.exists() and jsonl.exists()

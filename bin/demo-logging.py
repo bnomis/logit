@@ -13,7 +13,7 @@ import warnings
 import joblib
 import loguru
 
-import logit.base
+import logit
 import tests.emitters.some_lib
 import tests.emitters.unwanted
 import tests.emitters.wanted
@@ -47,10 +47,10 @@ def emit_all():
 
 
 def subprocess_entrypoint():
-    logit.base.setup_logger(disabled=DISABLED, subprocess=True)
-    stdout_stream = logit.base.StreamToLogger(level='INFO')
-    stderr_stream = logit.base.StreamToLogger(level='ERROR')
-    with contextlib.redirect_stdout(stdout_stream), contextlib.redirect_stderr(stderr_stream):
+    logit.setup_logger(disabled=DISABLED, subprocess=True)
+    stdout_stream = logit.StreamToLogger(level='INFO')
+    stderr_stream = logit.StreamToLogger(level='ERROR')
+    with contextlib.redirect_stdout(stdout_stream), contextlib.redirect_stderr(stderr_stream):  # type: ignore
         emit_all()
     loguru.logger.complete()
 
@@ -83,10 +83,10 @@ def demo_threads():
 
 
 def main():
-    logit.base.setup_logger(disabled=DISABLED)
-    stdout_stream = logit.base.StreamToLogger(level='INFO')
-    stderr_stream = logit.base.StreamToLogger(level='ERROR')
-    with contextlib.redirect_stdout(stdout_stream), contextlib.redirect_stderr(stderr_stream):
+    logit.setup_logger(disabled=DISABLED)
+    stdout_stream = logit.StreamToLogger(level='INFO')
+    stderr_stream = logit.StreamToLogger(level='ERROR')
+    with contextlib.redirect_stdout(stdout_stream), contextlib.redirect_stderr(stderr_stream):  # type: ignore
         emit_all()
         demo_joblib()
         demo_multiprocessing()

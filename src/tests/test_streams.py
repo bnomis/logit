@@ -1,7 +1,7 @@
 import inspect
 import sys
 
-import logit.base
+import logit
 import tests.emitters.wanted
 
 
@@ -77,7 +77,7 @@ def test_bare_newline_produces_no_record(capture):
 
 
 def test_empty_and_whitespace_writes_produce_no_records(capture):
-    stream = logit.base.StreamToLogger(level='INFO')
+    stream = logit.StreamToLogger(level='INFO')
     stream.write('\n')
     stream.write('   \n\t')
     stream.write('')
@@ -86,20 +86,20 @@ def test_empty_and_whitespace_writes_produce_no_records(capture):
 
 
 def test_trailing_whitespace_is_stripped_per_line(capture):
-    stream = logit.base.StreamToLogger(level='INFO')
+    stream = logit.StreamToLogger(level='INFO')
     stream.write('padded   \nalso padded\t\n')
 
     assert capture.messages() == ['padded', 'also padded']
 
 
 def test_stream_level_is_configurable(capture):
-    logit.base.StreamToLogger(level='CRITICAL').write('urgent\n')
+    logit.StreamToLogger(level='CRITICAL').write('urgent\n')
 
     assert capture.find('urgent')['level']['name'] == 'CRITICAL'
 
 
 def test_flush_is_a_noop(capture):
-    stream = logit.base.StreamToLogger(level='INFO')
+    stream = logit.StreamToLogger(level='INFO')
     stream.write('before flush\n')
     stream.flush()
 
