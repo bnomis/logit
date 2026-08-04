@@ -101,6 +101,21 @@ def test_explicit_line_argument_is_used_verbatim(capture):
     assert capture.messages() == ['UserWarning: explicit', '  the given line']
 
 
+def test_source_line_lookup_failure_still_logs_the_warning(capture, monkeypatch):
+    """An OSError from linecache must not swallow the warning itself."""
+
+    def raise_oserror(filename, lineno):
+        raise OSError('boom')
+
+    monkeypatch.setattr('linecache.getline', raise_oserror)
+    warnings.showwarning('lookup failed', UserWarning, 'somewhere.py', 1)
+
+    assert capture.messages() == [
+        'could not read source line from somewhere.py',
+        'UserWarning: lookup failed',
+    ]
+
+
 def test_setup_installs_the_hook_and_reset_restores_it(setup):
     original = warnings.showwarning
     setup()

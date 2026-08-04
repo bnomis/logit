@@ -59,15 +59,13 @@ def showwarning(message, category, filename, lineno, file=None, line=None):
     msg = f'{category.__name__}: {message}'
     # from stdlib warnings.py
     if line is None and filename != 'sys':
-        try:
-            import linecache
+        import linecache
 
+        try:
             line = linecache.getline(filename, lineno)
-        except Exception:
+        except OSError:
+            logger.debug(f'could not read source line from {filename}')
             line = None
-            linecache = None
-    else:
-        line = line
 
     if line:
         line = line.strip()

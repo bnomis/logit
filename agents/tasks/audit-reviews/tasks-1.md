@@ -75,7 +75,7 @@ from `__all__`. No task needs further human input.
 
 ## Task 3: Narrow the silent broad `except` around the source-line lookup
 
-**Status:** todo
+**Status:** done
 **Priority:** medium
 **Complexity:** small
 **Source Reference:** Finding "silent broad `except` around `linecache.getline`" (mechanical `silent-broad-except`, A19)
@@ -84,23 +84,24 @@ from `__all__`. No task needs further human input.
 
 **Subtasks:**
 
-- [ ] Change `except Exception:` at `src/logit/base.py:61` to `except OSError:`
-- [ ] Remove the `linecache = None` rebind (the name is never read again)
-- [ ] Add `logger.debug` on the failure path recording the path that could not be read
-- [ ] Add a test covering the failure branch - e.g. `warnings.showwarning(..., filename=str(tmp_path))` where the path is a directory - asserting the warning record is still emitted without a source line
+- [x] Change `except Exception:` at `src/logit/base.py:61` to `except OSError:`
+- [x] Remove the `linecache = None` rebind (the name is never read again)
+- [x] Add `logger.debug` on the failure path recording the path that could not be read
+- [x] Add a test covering the failure branch - e.g. `warnings.showwarning(..., filename=str(tmp_path))` where the path is a directory - asserting the warning record is still emitted without a source line
 
 **Acceptance Criteria:**
 
-- [ ] `KeyboardInterrupt` / `MemoryError` raised during the lookup are no longer swallowed
-- [ ] An unreadable filename still produces the warning record and no source-line record
-- [ ] `pytest src/tests/test_warnings.py` passes
-- [ ] The `silent-broad-except` hit no longer appears in the audit script output
+- [x] `KeyboardInterrupt` / `MemoryError` raised during the lookup are no longer swallowed
+- [x] An unreadable filename still produces the warning record and no source-line record
+- [x] `pytest src/tests/test_warnings.py` passes
+- [x] The `silent-broad-except` hit no longer appears in the audit script output
 
 **Notes:**
 
 - Key file: `src/logit/base.py:56-65`
 - The `else: line = line` branch on lines 64-65 is a no-op self-assignment; drop it while you are in there
 - Related: Task 10 hoists the `import linecache` on line 58 out of the function
+- Correction found during implementation: CPython's `linecache.updatecache` already wraps its own `os.stat`/`open` calls in `except OSError: return []`, so `linecache.getline` never raises `OSError` for an unreadable path - a directory `filename` just yields `''` without touching our `except` clause. The regression test uses `monkeypatch.setattr('linecache.getline', ...)` to force the `OSError` directly instead, so the branch is actually exercised.
 
 ---
 
