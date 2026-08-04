@@ -2,6 +2,9 @@ import inspect
 import sys
 import typing
 
+import hypothesis
+import hypothesis.strategies
+
 import logit
 import tests.emitters.wanted
 
@@ -108,3 +111,14 @@ def test_flush_is_a_noop(capture: tests.fixtures.base.LogCapture) -> None:
     stream.flush()
 
     assert capture.messages() == ['before flush']
+
+
+@hypothesis.settings(max_examples=20, deadline=10000, suppress_health_check=[hypothesis.HealthCheck.function_scoped_fixture])
+@hypothesis.given(buffer=hypothesis.strategies.text())
+def test_write_splits_and_strips_arbitrary_text(buffer: str, capture: tests.fixtures.base.LogCapture) -> None:
+    stream = logit.StreamToLogger(level='INFO')
+    before = len(capture.messages())
+    stream.write(buffer)
+
+    expected = [line.rstrip() for line in buffer.rstrip().splitlines()]
+    assert capture.messages()[before:] == expected
