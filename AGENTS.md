@@ -19,9 +19,12 @@ The core logging architecture is in [src/logit/base.py](src/logit/base.py):
 
 1. **InterceptHandler**: Custom `logging.Handler` that intercepts all standard library logging calls and redirects them to loguru with proper stack depth tracking for accurate file/line numbers.
 
-2. **Selective Module Logging**: The logging configuration demonstrates two patterns:
-   - `logit.wanted`: Logs are processed and output normally
-   - `logit.unwanted`: Logs are suppressed via `NullHandler` in the logging config AND `logger.disable()` for loguru
+2. **Selective Module Logging**: `setup_logger(disabled=[...])` takes a list of dotted module names to silence. Each name is applied through three mechanisms, because each covers a different capture path:
+   - `NullHandler` in the stdlib logging config (stdlib `logging` calls)
+   - `logger.disable()` (loguru calls, and `print()` via `StreamToLogger`)
+   - `warnings.filterwarnings(module=...)` (Python warnings)
+
+   Any module not in the list logs normally.
 
 3. **Warnings Integration**: Custom `warnings.showwarning` override that routes Python warnings through loguru while maintaining proper source location tracking using frame inspection.
 
@@ -35,9 +38,35 @@ The core logging architecture is in [src/logit/base.py](src/logit/base.py):
 ### Module Structure
 
 - [src/logit/base.py](src/logit/base.py): Core logging setup and configuration
-- [src/tests/test_logit.py](src/tests/test_logit.py): test entry point demonstrating all logging features
-- [src/tests/src/wanted.py](src/tests/src/wanted.py): Example module with logging enabled
-- [src/tests/src/unwanted.py](src/tests/src/unwanted.py): Example module with logging disabled
+- [bin/demo-logging.py](bin/demo-logging.py): visual demo of every capture path, run via [bin/demo-logging.sh](bin/demo-logging.sh)
+- [src/tests/emitters/](src/tests/emitters): modules that emit on every capture path, used as test subjects
+- [src/tests/fixtures/base.py](src/tests/fixtures/base.py): `LogCapture`, which reads the sinks back for assertions
+
+### Tests
+
+Tests assert *where* each message lands. The jsonl sink is the oracle: it
+serialises the origin module (`record.name`), source location
+(`file`/`line`/`function`), level and process/thread identity, so routing,
+level mapping and frame-depth correctness can all be checked from it.
+
+The `capture` fixture configures logit into a `tmp_path` and hands back a
+`LogCapture`. Use `setup` instead when a test needs to choose `disabled` or
+`subprocess`. Both restore the global loguru/logging/warnings state on teardown.
+
+| File | Covers |
+|---|---|
+| `test_sinks.py` | one record reaching stderr, `log.log` and `log.jsonl` consistently |
+| `test_intercept.py` | stdlib `logging` -> loguru: level mapping, attribution, `exc_info` |
+| `test_streams.py` | `print()` / stdout / stderr via `StreamToLogger` |
+| `test_warnings.py` | `warnings.warn` and direct `showwarning` calls |
+| `test_selective.py` | enabled vs disabled module routing across all five paths |
+| `test_concurrency.py` | threads, `multiprocessing`, joblib, per-pid files (`slow`) |
+
+```shell
+source bin/activate.sh
+pytest -m "not slow"    # fast suite
+pytest -m slow          # forking tests
+```
 
 ## Key Implementation Details
 
@@ -49,5 +78,11 @@ When intercepting logging calls from stdlib or warnings, the code uses frame ins
 
 Two mechanisms work together to suppress unwanted warnings:
 
-1. `warnings.filterwarnings('ignore', module='logit.unwanted')` - stdlib filtering
-2. `logger.disable('logit.unwanted')` - loguru-specific disabling
+1. `warnings.filterwarnings('ignore', module=...)` - stdlib filtering. CPython
+   matches this regex, anchored at the start, against the emitting module's
+   dotted `__name__`, so the name is `re.escape`d before use.
+2. `logger.disable(...)` - loguru-specific disabling.
+
+Note that attribution follows the *call frame*, not the `filename` argument: a
+warning raised from inside a disabled module is suppressed, but a warning
+*about* that module raised from elsewhere is not.
