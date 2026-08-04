@@ -79,11 +79,6 @@ def showwarning(message, category, filename, lineno, file=None, line=None):
     # showwarning_(message, category, filename, lineno, file=file, line=line)
 
 
-class LoguruHandler(logging.Handler):
-    def emit(self, record):
-        logger.log(record.levelname, self.format(record))
-
-
 class InterceptHandler(logging.Handler):
     def emit(self, record: logging.LogRecord) -> None:
         # Get corresponding Loguru level if it exists.

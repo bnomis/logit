@@ -48,7 +48,7 @@ from `__all__`. No task needs further human input.
 
 ## Task 2: Delete the dead `LoguruHandler` class
 
-**Status:** todo
+**Status:** done
 **Priority:** medium
 **Complexity:** small
 **Source Reference:** Finding "dead `LoguruHandler` class" (T1)
@@ -57,14 +57,14 @@ from `__all__`. No task needs further human input.
 
 **Subtasks:**
 
-- [ ] Delete `LoguruHandler` from `src/logit/base.py:77-79`
-- [ ] Confirm with grep that nothing under `src/`, `bin/` or the dictConfig at `src/logit/base.py:119-128` references it
+- [x] Delete `LoguruHandler` from `src/logit/base.py:77-79`
+- [x] Confirm with grep that nothing under `src/`, `bin/` or the dictConfig at `src/logit/base.py:119-128` references it
 
 **Acceptance Criteria:**
 
-- [ ] `grep -rn LoguruHandler src bin` returns nothing
-- [ ] `pytest -m "not slow"` passes
-- [ ] The `legacy-formatting-format` hit at `src/logit/base.py:79` no longer appears in the audit script output
+- [x] `grep -rn LoguruHandler src bin` returns nothing
+- [x] `pytest -m "not slow"` passes
+- [x] The `legacy-formatting-format` hit at `src/logit/base.py:79` no longer appears in the audit script output
 
 **Notes:**
 
