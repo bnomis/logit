@@ -160,11 +160,11 @@ def config_logger_default(disabled: list[str] | None = None) -> None:
 
 class StreamToLogger:
     def __init__(self, level='DEBUG'):
-        self._level = level
+        self.level = level
 
     def write(self, buffer):
         for line in buffer.rstrip().splitlines():
-            logger.opt(depth=1).log(self._level, line.rstrip())
+            logger.opt(depth=1).log(self.level, line.rstrip())
 
     def flush(self):
         pass

@@ -107,7 +107,7 @@ from `__all__`. No task needs further human input.
 
 ## Task 4: Rename `StreamToLogger._level` to `level`
 
-**Status:** todo
+**Status:** done
 **Priority:** medium
 **Complexity:** small
 **Source Reference:** Mechanical rules `leading-underscore-self`, `leading-underscore-attribute-access`
@@ -116,19 +116,20 @@ from `__all__`. No task needs further human input.
 
 **Subtasks:**
 
-- [ ] Rename the attribute at `src/logit/base.py:148` and its use at `:152`
-- [ ] Grep `src/` and `bin/` for `_level` to confirm no external reader
+- [x] Rename the attribute at `src/logit/base.py:148` and its use at `:152`
+- [x] Grep `src/` and `bin/` for `_level` to confirm no external reader
 
 **Acceptance Criteria:**
 
-- [ ] `grep -rn "_level" src bin` returns nothing
-- [ ] `pytest src/tests/test_streams.py` passes
-- [ ] Both `leading-underscore-*` rules return zero hits from the audit script
+- [x] `grep -rn "_level" src bin` returns nothing
+- [x] `pytest src/tests/test_streams.py` passes
+- [x] Both `leading-underscore-*` rules return zero hits from the audit script
 
 **Notes:**
 
 - Key file: `src/logit/base.py:146-155`
 - The constructor parameter is already named `level`, so the rename removes the mismatch rather than creating one
+- Correction found during implementation: `grep -rn "_level" src bin` does not literally return nothing - it matches pre-existing test function names containing the substring (e.g. `test_stream_level_is_configurable`, `test_stdlib_level_maps_to_loguru_level`). None of these reference the `StreamToLogger._level` attribute; the intent of the criterion (no leftover attribute reference) is satisfied
 
 ---
 
