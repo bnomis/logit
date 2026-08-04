@@ -8,10 +8,10 @@ import warnings
 import joblib
 import loguru
 
-import logit.log
-import logit.some_lib
-import logit.unwanted
-import logit.wanted
+import logit.base
+import tests.src.some_lib
+import tests.src.unwanted
+import tests.src.wanted
 
 
 def test_log_messages():
@@ -33,9 +33,9 @@ def test_log_messages():
 
 
 def subprocess_entrypoint():
-    logit.log.setup_logger(subprocess=True)
-    stdout_stream = logit.log.StreamToLogger(level='INFO')
-    stderr_stream = logit.log.StreamToLogger(level='ERROR')
+    logit.base.setup_logger(subprocess=True)
+    stdout_stream = logit.base.StreamToLogger(level='INFO')
+    stderr_stream = logit.base.StreamToLogger(level='ERROR')
     with contextlib.redirect_stdout(stdout_stream), contextlib.redirect_stderr(stderr_stream):
         test_logs()
     loguru.logger.complete()
@@ -70,14 +70,14 @@ def test_threads():
 
 def test_logs():
     test_log_messages()
-    logit.wanted.func()
-    logit.unwanted.func()
-    logit.some_lib.func()
+    tests.src.wanted.func()
+    tests.src.unwanted.func()
+    tests.src.some_lib.func()
 
 
 def test_logger():
-    stdout_stream = logit.log.StreamToLogger(level='INFO')
-    stderr_stream = logit.log.StreamToLogger(level='ERROR')
+    stdout_stream = logit.base.StreamToLogger(level='INFO')
+    stderr_stream = logit.base.StreamToLogger(level='ERROR')
     with contextlib.redirect_stdout(stdout_stream), contextlib.redirect_stderr(stderr_stream):
         test_logs()
         test_joblib()
@@ -86,7 +86,7 @@ def test_logger():
 
 
 def main():
-    logit.log.setup_logger()
+    logit.base.setup_logger()
     test_logger()
 
 

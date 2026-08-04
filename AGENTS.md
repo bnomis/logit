@@ -1,48 +1,21 @@
-# CLAUDE.md
+# logit
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+A loguru wrapper.
 
 ## Project Overview
 
-This is a test project exploring loguru for logging in Python. The project demonstrates how to:
+This is a project exploring loguru for logging in Python. The project demonstrates how to:
 
 - Intercept standard library `logging` calls and route them through loguru
 - Capture `print()` statements and Python warnings as log messages
 - Selectively enable/disable logging from specific modules
 - Configure multiple log outputs (stderr, file, and JSONL)
 
-## Development Commands
-
-### Running the Application
-
-```bash
-python bin/main.py
-```
-
-### Linting and Formatting
-
-```bash
-# Run linter
-ruff check .
-
-# Run formatter
-ruff format .
-
-# Run pre-commit hooks
-pre-commit run --all-files
-```
-
-### Type Checking
-
-```bash
-pyright
-```
-
 ## Code Architecture
 
 ### Logging System Design
 
-The core logging architecture is in [src/logit/log.py](src/logit/log.py):
+The core logging architecture is in [src/logit/base.py](src/logit/base.py):
 
 1. **InterceptHandler**: Custom `logging.Handler` that intercepts all standard library logging calls and redirects them to loguru with proper stack depth tracking for accurate file/line numbers.
 
@@ -61,24 +34,10 @@ The core logging architecture is in [src/logit/log.py](src/logit/log.py):
 
 ### Module Structure
 
-- [bin/main.py](bin/main.py): Entry point demonstrating all logging features
-- [src/logit/log.py](src/logit/log.py): Core logging setup and configuration
-- [src/logit/wanted.py](src/logit/wanted.py): Example module with logging enabled
-- [src/logit/unwanted.py](src/logit/unwanted.py): Example module with logging disabled
-
-## Code Style Configuration
-
-### Ruff Settings (from [pyproject.toml](pyproject.toml))
-
-- Line length: 160 characters
-- Quote style: Single quotes
-- Enabled linters: flake8-bugbear, pycodestyle, Pyflakes, isort, flake8-simplify, NPY201
-- Ignored rules: E501 (line length), E722 (bare except), SIM108 (ternary operator)
-- Import sorting: `combine-as-imports = true`
-
-### Pyright Configuration
-
-Most type checking errors are disabled in this project (see [pyproject.toml](pyproject.toml:50-63)). This is a test project, not production code.
+- [src/logit/base.py](src/logit/base.py): Core logging setup and configuration
+- [src/tests/test_logit.py](src/tests/test_logit.py): test entry point demonstrating all logging features
+- [src/tests/src/wanted.py](src/tests/src/wanted.py): Example module with logging enabled
+- [src/tests/src/unwanted.py](src/tests/src/unwanted.py): Example module with logging disabled
 
 ## Key Implementation Details
 
