@@ -347,7 +347,7 @@ from `__all__`. No task needs further human input.
 
 ## Task 12: Cache parsed records in `LogCapture`
 
-**Status:** todo
+**Status:** done
 **Priority:** low
 **Complexity:** small
 **Source Reference:** Finding "`LogCapture` re-reads and re-parses the sink on every accessor" (A14 / P3)
@@ -356,20 +356,22 @@ from `__all__`. No task needs further human input.
 
 **Subtasks:**
 
-- [ ] Cache the parsed record list on the `LogCapture` instance, invalidated whenever `complete()` runs or new records may have been written
-- [ ] Make `find()` reuse the list it already loaded for its assertion message instead of calling `messages()` (which re-parses)
-- [ ] Verify the cache cannot mask records written between two assertions in the same test
+- [x] Cache the parsed record list on the `LogCapture` instance, invalidated whenever `complete()` runs or new records may have been written
+- [x] Make `find()` reuse the list it already loaded for its assertion message instead of calling `messages()` (which re-parses)
+- [x] Verify the cache cannot mask records written between two assertions in the same test
 
 **Acceptance Criteria:**
 
-- [ ] A test calling `find()` five times parses the file once
-- [ ] `pytest -m "not slow"` and `pytest -m slow` both pass unchanged
+- [x] A test calling `find()` five times parses the file once
+- [x] `pytest -m "not slow"` and `pytest -m slow` both pass unchanged
 
 **Notes:**
 
 - Key file: `src/tests/fixtures/base.py:24-51`
 - `src/tests/test_sinks.py:35-38` is the worst case: five `find()` calls, so five full parses
 - Correctness beats speed here - if a safe invalidation rule is not obvious, cache only within a single accessor call (fixing `find()`) and leave `records()` alone
+- Implemented as: `records()` still calls `complete()` unconditionally (so a background write in flight is always flushed to disk first), then compares the jsonl file's `(st_mtime_ns, st_size)` against the cached key and only re-parses if it changed. A blind "`complete()` clears the cache" rule was rejected because `records()` calls `complete()` on every invocation, which would invalidate the cache on every call and defeat the caching entirely. The stat-based key re-parses exactly when new bytes have actually landed on disk, so it satisfies both the five-calls-one-parse requirement and the no-masking requirement without them being in tension
+- Added `test_find_parses_the_sink_once_across_repeated_calls` (monkeypatches `json.loads` to count invocations) and `test_cache_does_not_mask_records_written_between_assertions` to `src/tests/test_sinks.py`
 
 ---
 

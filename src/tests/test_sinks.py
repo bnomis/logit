@@ -1,4 +1,5 @@
 import io
+import json
 import os
 import typing
 
@@ -46,12 +47,43 @@ def test_each_level_serialises_with_name_and_number(capture: tests.fixtures.base
         assert record['level']['no'] == number
 
 
+def test_find_parses_the_sink_once_across_repeated_calls(
+    capture: tests.fixtures.base.LogCapture,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    names = ['first', 'second', 'third', 'fourth', 'fifth']
+    for name in names:
+        loguru.logger.info(name)
+
+    real_loads = json.loads
+    parsed_lines = []
+
+    def counting_loads(line: str) -> dict:
+        parsed_lines.append(line)
+        return real_loads(line)
+
+    monkeypatch.setattr(json, 'loads', counting_loads)
+
+    for name in names:
+        capture.find(name)
+
+    assert len(parsed_lines) == len(names)
+
+
 def test_text_sink_has_one_line_per_record(capture: tests.fixtures.base.LogCapture) -> None:
     for index in range(5):
         loguru.logger.info(f'line {index}')
 
     assert len(capture.records()) == 5
     assert len([line for line in capture.text().splitlines() if line.strip()]) == 5
+
+
+def test_cache_does_not_mask_records_written_between_assertions(capture: tests.fixtures.base.LogCapture) -> None:
+    loguru.logger.info('first batch')
+    assert capture.messages() == ['first batch']
+
+    loguru.logger.info('second batch')
+    assert capture.messages() == ['first batch', 'second batch']
 
 
 def test_subprocess_mode_uses_per_pid_filenames(setup: typing.Callable[..., tests.fixtures.base.LogCapture]) -> None:
