@@ -217,11 +217,11 @@ def setup_logger(
     # dont need to take over stdout
     # logger.add(sys.__stdout__)
     # terminal/stderr
-    logger.add(  # pyright: ignore[reportCallIssue]
-        stderr if stderr is not None else sys.__stderr__,
+    logger.add(
+        stderr if stderr is not None else sys.__stderr__,  # type: ignore
         format='{time:YYYY-MM-DDTHH:mm:ss!UTC} <level>{level: <8}</level> {process.id} {thread.id} {file}:{line}/{function} {message}',
         enqueue=True,
-    )
+    )  # type: ignore
     # log to file
     logger.add(
         log_file(directory=directory, subprocess=subprocess),

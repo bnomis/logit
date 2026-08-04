@@ -64,5 +64,5 @@ class LogCapture:
         """Route print()/stdout/stderr through StreamToLogger, as the app does."""
         out = logit.base.StreamToLogger(level='INFO')
         err = logit.base.StreamToLogger(level='ERROR')
-        with contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):  # pyright: ignore[reportArgumentType]
+        with contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):  # type: ignore
             yield

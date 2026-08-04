@@ -4,17 +4,15 @@ version = "0.1.0"
 description = "Testing loguru and logging"
 readme = "README.md"
 requires-python = ">=3.14"
-dependencies = [
-    "joblib>=1.5.3",
-    "loguru>=0.7.3",
-]
+dependencies = ["joblib>=1.5.3", "loguru>=0.7.3"]
+
+[dependency-groups]
+dev = ["pytest>=9.1.1"]
 
 
 [tool.pytest.ini_options]
 testpaths = ['src/tests']
-markers = [
-    'slow: tests that fork processes or sleep; skip with -m "not slow"',
-]
+markers = ['slow: tests that fork processes or sleep; skip with -m "not slow"']
 
 
 [tool.ruff]
@@ -51,23 +49,3 @@ ignore = ['E501', 'E722', 'SIM108']
 combine-as-imports = true
 known-first-party = []
 known-third-party = ['loguru']
-
-[tool.pyright]
-reportAny = false
-reportArgumentType = false
-reportExplicitAny = false
-reportGeneralTypeIssues = false
-reportMissingTypeArgument = false
-reportMissingTypeStubs = false
-reportOptionalSubscript = false
-reportUnknownArgumentType = false
-reportUnknownMemberType = false
-reportUnknownParameterType = false
-reportUnknownVariableType = false
-reportUnusedCallResult = false
-reportUnannotatedClassAttribute = false
-
-[dependency-groups]
-dev = [
-    "pytest>=9.1.1",
-]
