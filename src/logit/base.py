@@ -1,5 +1,8 @@
 import contextlib
 import inspect
+import linecache
+
+# auditme: accept interceptor must import stdlib logging
 import logging
 import logging.config
 import os
@@ -70,8 +73,6 @@ def showwarning(
     msg = f'{category.__name__}: {message}'
     # from stdlib warnings.py
     if line is None and filename != 'sys':
-        import linecache
-
         try:
             line = linecache.getline(filename, lineno)
         except OSError:

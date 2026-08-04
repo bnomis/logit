@@ -286,7 +286,7 @@ from `__all__`. No task needs further human input.
 
 ## Task 10: Clear the remaining mechanical hits
 
-**Status:** todo
+**Status:** done
 **Priority:** low
 **Complexity:** small
 **Source Reference:** Mechanical rules `stdlib-logging`, `in-function-import`, `non-alphabetical-literal`, `legacy-formatting-format`; Finding "empty `tests/emitters/__init__.py`" (A17)
@@ -295,20 +295,21 @@ from `__all__`. No task needs further human input.
 
 **Subtasks:**
 
-- [ ] Hoist `import linecache` from `src/logit/base.py:58` into the module import block
-- [ ] Sort `src/logit/__init__.py:3` to `['StreamToLogger', 'jsonl_file', 'log_file', 'reset', 'setup_logger', 'showwarning']` (`log_dir` is removed by Task 11)
-- [ ] Add `# auditme: accept interceptor must import stdlib logging` above `src/logit/base.py:2`
-- [ ] Add `# auditme: accept emitter modules exist to be addressed by dotted name` to `src/tests/emitters/__init__.py`
-- [ ] Re-run `python3 ~/.claude/skills/auditme/checks/audit.py . --package logit` and confirm every remaining hit is `accepted: true`
+- [x] Hoist `import linecache` from `src/logit/base.py:58` into the module import block
+- [x] Sort `src/logit/__init__.py:3` to `['StreamToLogger', 'jsonl_file', 'log_file', 'reset', 'setup_logger', 'showwarning']` (`log_dir` is removed by Task 11)
+- [x] Add `# auditme: accept interceptor must import stdlib logging` above `src/logit/base.py:2`
+- [x] Add `# auditme: accept emitter modules exist to be addressed by dotted name` to `src/tests/emitters/__init__.py`
+- [x] Re-run `python3 ~/.claude/skills/auditme/checks/audit.py . --package logit` and confirm every remaining hit is `accepted: true`
 
 **Acceptance Criteria:**
 
-- [ ] The audit script reports zero `accepted: false` hits
-- [ ] `pytest -m "not slow"` passes
-- [ ] `ruff check` is clean
+- [x] The audit script reports zero `accepted: false` hits
+- [x] `pytest -m "not slow"` passes
+- [x] `ruff check` is clean
 
 **Notes:**
 
+- The worktree's inherited `PYTHONPATH` had a stale entry from an unrelated project (`ralpher/src`, which contains its own `tests` package with an `__init__.py`) ahead of nothing overriding it. Because `src/tests` here is an implicit namespace package (no `__init__.py`), Python's import resolution picked the regular `tests` package from the other project instead, breaking `import tests.fixtures.base`. Not a code defect - running with `unset PYTHONPATH` before `source bin/activate.sh` avoids it.
 - Depends on Tasks 2, 3, 4 and 11 - those remove the `legacy-formatting-format`, `silent-broad-except`, `leading-underscore-*` and (possibly) `non-alphabetical-literal` hits at source, so this task only mops up what is genuinely intentional
 - The script scans `src/logit/` only; the emitters marker is for Phase B, not the script
 - This is the convergence gate: review-2 on unchanged code should report the same finding set as review-1 minus everything fixed here
