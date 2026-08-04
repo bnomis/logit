@@ -317,7 +317,7 @@ from `__all__`. No task needs further human input.
 
 ## Task 11: Drop `log_dir` from the public surface
 
-**Status:** todo
+**Status:** done
 **Priority:** low
 **Complexity:** small
 **Source Reference:** Finding "`log_dir` exported but unused" (A17)
@@ -326,16 +326,16 @@ from `__all__`. No task needs further human input.
 
 **Subtasks:**
 
-- [ ] Remove `log_dir` from `__all__` and from the re-export at `src/logit/__init__.py:1`
-- [ ] Keep `log_dir` in `src/logit/base.py:176` - `log_file` and `jsonl_file` still call it for their default
-- [ ] Confirm `log_file`/`jsonl_file` cover every external need (`src/tests/test_sinks.py:55-56` and `src/tests/fixtures/base.py:30,55` are the only consumers)
-- [ ] Grep `src/` and `bin/` for `logit.log_dir` to confirm nothing breaks
+- [x] Remove `log_dir` from `__all__` and from the re-export at `src/logit/__init__.py:1`
+- [x] Keep `log_dir` in `src/logit/base.py:176` - `log_file` and `jsonl_file` still call it for their default
+- [x] Confirm `log_file`/`jsonl_file` cover every external need (`src/tests/test_sinks.py:55-56` and `src/tests/fixtures/base.py:30,55` are the only consumers)
+- [x] Grep `src/` and `bin/` for `logit.log_dir` to confirm nothing breaks
 
 **Acceptance Criteria:**
 
-- [ ] Every symbol in `__all__` has at least one consumer outside `src/logit/`
-- [ ] `grep -rn "logit.log_dir\|log_dir" src bin` matches only `src/logit/base.py`
-- [ ] `pytest -m "not slow"` passes
+- [x] Every symbol in `__all__` has at least one consumer outside `src/logit/`
+- [x] `grep -rn "logit.log_dir\|log_dir" src bin` matches only `src/logit/base.py`
+- [x] `pytest -m "not slow"` passes
 
 **Notes:**
 
