@@ -10,6 +10,13 @@ dependencies = [
 ]
 
 
+[tool.pytest.ini_options]
+testpaths = ['src/tests']
+markers = [
+    'slow: tests that fork processes or sleep; skip with -m "not slow"',
+]
+
+
 [tool.ruff]
 line-length = 160
 
@@ -59,3 +66,8 @@ reportUnknownParameterType = false
 reportUnknownVariableType = false
 reportUnusedCallResult = false
 reportUnannotatedClassAttribute = false
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+]
