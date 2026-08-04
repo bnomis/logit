@@ -29,10 +29,25 @@ def showwarning_orig(message, *args, **kwargs):
     showwarning_(message, *args, **kwargs)
 
 
+def internal_files() -> set[str]:
+    """Files whose frames sit between the warning site and this hook.
+
+    warnings.warn reaches showwarning via an internal _showwarnmsg frame, while
+    a direct showwarning() call has none. Skipping these by filename keeps the
+    reported location correct for both routes.
+    """
+    files = {logging.__file__, warnings.__file__}
+    hook = getattr(warnings, '_showwarnmsg', None)
+    if hook is not None:
+        files.add(hook.__code__.co_filename)
+    return files
+
+
 def showwarning(message, category, filename, lineno, file=None, line=None):
     # Find caller from where originated the logged message.
+    internal = internal_files()
     frame, depth = inspect.currentframe(), 0
-    while frame and (depth == 0 or frame.f_code.co_filename == logging.__file__):
+    while frame and (depth == 0 or frame.f_code.co_filename in internal):
         frame = frame.f_back
         depth += 1
 
@@ -51,7 +66,6 @@ def showwarning(message, category, filename, lineno, file=None, line=None):
 
     if line:
         line = line.strip()
-        depth += 1
 
     logger.opt(depth=depth).warning(msg)
     if line:
