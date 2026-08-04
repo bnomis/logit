@@ -3,12 +3,18 @@ import logging
 import logging.config
 import os
 import pathlib
+import re
 import sys
+import typing
 import warnings
 
 from loguru import logger
 
 showwarning_ = warnings.showwarning
+
+# loguru's disable() is global and outlives logger.remove(), so track what we
+# disabled in order to undo it in reset()
+disabled_ = []
 
 
 def showwarning_orig(message, *args, **kwargs):
@@ -77,7 +83,7 @@ class InterceptHandler(logging.Handler):
         logger.opt(depth=depth, exception=record.exc_info).log(level, record.getMessage())
 
 
-def config_logger_default() -> None:
+def config_logger_default(disabled: list[str] | None = None) -> None:
     default_handlers = [
         'loguru',
     ]
@@ -111,16 +117,12 @@ def config_logger_default() -> None:
             'level': 'DEBUG',
         },
         'loggers': {
-            'logit.wanted': {
-                'handlers': default_handlers,
-                'level': 'DEBUG',
-                'propagate': False,
-            },
-            'logit.unwanted': {
+            name: {
                 'handlers': null_handlers,
                 'level': 'DEBUG',
                 'propagate': False,
-            },
+            }
+            for name in disabled or []
         },
     }
 
@@ -139,15 +141,18 @@ class StreamToLogger:
         pass
 
 
-def take_over_logging():
-    config_logger_default()
+def take_over_logging(disabled: list[str] | None = None) -> None:
+    config_logger_default(disabled=disabled)
 
 
-def setup_warnings():
+def setup_warnings(disabled: list[str] | None = None) -> None:
     logging.captureWarnings(True)
     warnings.resetwarnings()
     warnings.showwarning = showwarning
-    warnings.filterwarnings('ignore', module='logit.unwanted')
+    for name in disabled or []:
+        # the filter's module is a regex matched against the emitting
+        # module's dotted __name__, so the dots must not act as wildcards
+        warnings.filterwarnings('ignore', module=re.escape(name))
 
 
 def this_dir() -> pathlib.Path:
@@ -158,45 +163,65 @@ def log_dir() -> pathlib.Path:
     return this_dir().parent.parent / 'log'
 
 
-def log_file(subprocess: bool = False) -> pathlib.Path:
+def log_file(directory: pathlib.Path | None = None, subprocess: bool = False) -> pathlib.Path:
+    directory = directory or log_dir()
     if subprocess:
-        return log_dir() / f'log-{os.getpid()}.log'
-    return log_dir() / 'log.log'
+        return directory / f'log-{os.getpid()}.log'
+    return directory / 'log.log'
 
 
-def jsonl_file(subprocess: bool = False) -> pathlib.Path:
+def jsonl_file(directory: pathlib.Path | None = None, subprocess: bool = False) -> pathlib.Path:
+    directory = directory or log_dir()
     if subprocess:
-        return log_dir() / f'log-{os.getpid()}.jsonl'
-    return log_dir() / 'log.jsonl'
+        return directory / f'log-{os.getpid()}.jsonl'
+    return directory / 'log.jsonl'
 
 
-def setup_logger(subprocess: bool = False):
+def reset() -> None:
+    """Undo setup_logger: drop all sinks and restore the global state it mutated."""
+    logger.remove()
+    while disabled_:
+        logger.enable(disabled_.pop())
+    warnings.showwarning = showwarning_
+    warnings.resetwarnings()
+    logging.captureWarnings(False)
+    logging.config.dictConfig({'version': 1, 'disable_existing_loggers': False, 'root': {'handlers': []}})
+
+
+def setup_logger(
+    directory: pathlib.Path | None = None,
+    stderr: typing.TextIO | None = None,
+    disabled: list[str] | None = None,
+    subprocess: bool = False,
+) -> None:
     # remove all handlers
     logger.remove()
 
-    take_over_logging()
-    setup_warnings()
+    take_over_logging(disabled=disabled)
+    setup_warnings(disabled=disabled)
 
     # dont need to take over stdout
     # logger.add(sys.__stdout__)
     # terminal/stderr
     logger.add(  # pyright: ignore[reportCallIssue]
-        sys.__stderr__,
+        stderr if stderr is not None else sys.__stderr__,
         format='{time:YYYY-MM-DDTHH:mm:ss!UTC} <level>{level: <8}</level> {process.id} {thread.id} {file}:{line}/{function} {message}',
         enqueue=True,
     )
     # log to file
     logger.add(
-        log_file(subprocess=subprocess),
+        log_file(directory=directory, subprocess=subprocess),
         format='{time:YYYY-MM-DDTHH:mm:ss!UTC} {level: <8} {file}:{line}/{function} {message}',
         enqueue=True,
     )
     # log to jsonl
     logger.add(
-        jsonl_file(subprocess=subprocess),
+        jsonl_file(directory=directory, subprocess=subprocess),
         format='{time:YYYY-MM-DDTHH:mm:ss!UTC} {level: <8} {file}:{line}/{function} {message}',
         serialize=True,
         enqueue=True,
     )
-    # disable print messages from unwanted.py
-    logger.disable('logit.unwanted')
+    # suppress loguru records (including print capture) from disabled modules
+    for name in disabled or []:
+        logger.disable(name)
+        disabled_.append(name)
