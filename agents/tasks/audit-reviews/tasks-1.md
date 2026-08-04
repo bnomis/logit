@@ -253,7 +253,7 @@ from `__all__`. No task needs further human input.
 
 ## Task 9: Consolidate sink registration in `setup_logger`
 
-**Status:** todo
+**Status:** done
 **Priority:** low
 **Complexity:** small
 **Source Reference:** Findings "duplicated sink format strings" (A15) and "unguarded sink registration in `setup_logger`" (A1)
@@ -262,17 +262,17 @@ from `__all__`. No task needs further human input.
 
 **Subtasks:**
 
-- [ ] Hoist the shared record format (`'{time:YYYY-MM-DDTHH:mm:ss!UTC} {level: <8} {file}:{line}/{function} {message}'`) to a module-level constant and derive the stderr variant (colour tags plus process/thread fields) from it
-- [ ] Collect the id returned by each `logger.add(...)` as it succeeds
-- [ ] Wrap the three registrations so that on `OSError` every already-registered id is passed to `logger.remove(id)` before the exception is re-raised
-- [ ] Make the rollback tolerant of a sink that is already gone, so a failure during cleanup cannot mask the original error
-- [ ] Add a test using an unwritable directory asserting that `setup_logger` raises and that no sinks remain registered afterwards
+- [x] Hoist the shared record format (`'{time:YYYY-MM-DDTHH:mm:ss!UTC} {level: <8} {file}:{line}/{function} {message}'`) to a module-level constant and derive the stderr variant (colour tags plus process/thread fields) from it
+- [x] Collect the id returned by each `logger.add(...)` as it succeeds
+- [x] Wrap the three registrations so that on `OSError` every already-registered id is passed to `logger.remove(id)` before the exception is re-raised
+- [x] Make the rollback tolerant of a sink that is already gone, so a failure during cleanup cannot mask the original error
+- [x] Add a test using an unwritable directory asserting that `setup_logger` raises and that no sinks remain registered afterwards
 
 **Acceptance Criteria:**
 
-- [ ] Adding a field to the shared format changes both the text and jsonl sinks
-- [ ] A mid-sequence `OSError` leaves zero sinks registered and re-raises the original exception
-- [ ] `pytest src/tests/test_sinks.py` passes (the format assertions there pin the current layout)
+- [x] Adding a field to the shared format changes both the text and jsonl sinks
+- [x] A mid-sequence `OSError` leaves zero sinks registered and re-raises the original exception
+- [x] `pytest src/tests/test_sinks.py` passes (the format assertions there pin the current layout)
 
 **Notes:**
 

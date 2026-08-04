@@ -1,3 +1,4 @@
+import contextlib
 import inspect
 import logging
 import logging.config
@@ -11,6 +12,9 @@ import warnings
 import loguru
 
 showwarning_ = warnings.showwarning
+
+RECORD_FORMAT = '{time:YYYY-MM-DDTHH:mm:ss!UTC} {level: <8} {file}:{line}/{function} {message}'
+STDERR_FORMAT = RECORD_FORMAT.replace('{level: <8}', '<level>{level: <8}</level>').replace('{file}', '{process.id} {thread.id} {file}')
 
 # loguru's disable() is global and outlives logger.remove(), so track what we
 # disabled in order to undo it in reset()
@@ -243,27 +247,41 @@ def setup_logger(
     take_over_logging(disabled=disabled)
     setup_warnings(disabled=disabled)
 
-    # dont need to take over stdout
-    # logger.add(sys.__stdout__)
-    # terminal/stderr
-    loguru.logger.add(
-        stderr if stderr is not None else sys.__stderr__,  # type: ignore
-        format='{time:YYYY-MM-DDTHH:mm:ss!UTC} <level>{level: <8}</level> {process.id} {thread.id} {file}:{line}/{function} {message}',
-        enqueue=True,
-    )  # type: ignore
-    # log to file
-    loguru.logger.add(
-        log_file(directory=directory, subprocess=subprocess),
-        format='{time:YYYY-MM-DDTHH:mm:ss!UTC} {level: <8} {file}:{line}/{function} {message}',
-        enqueue=True,
-    )
-    # log to jsonl
-    loguru.logger.add(
-        jsonl_file(directory=directory, subprocess=subprocess),
-        format='{time:YYYY-MM-DDTHH:mm:ss!UTC} {level: <8} {file}:{line}/{function} {message}',
-        serialize=True,
-        enqueue=True,
-    )
+    sink_ids = []
+    try:
+        # dont need to take over stdout
+        # logger.add(sys.__stdout__)
+        # terminal/stderr
+        sink_ids.append(
+            loguru.logger.add(
+                stderr if stderr is not None else sys.__stderr__,  # type: ignore
+                format=STDERR_FORMAT,
+                enqueue=True,
+            )
+        )  # type: ignore
+        # log to file
+        sink_ids.append(
+            loguru.logger.add(
+                log_file(directory=directory, subprocess=subprocess),
+                format=RECORD_FORMAT,
+                enqueue=True,
+            )
+        )
+        # log to jsonl
+        sink_ids.append(
+            loguru.logger.add(
+                jsonl_file(directory=directory, subprocess=subprocess),
+                format=RECORD_FORMAT,
+                serialize=True,
+                enqueue=True,
+            )
+        )
+    except OSError:
+        for sink_id in sink_ids:
+            with contextlib.suppress(ValueError):
+                loguru.logger.remove(sink_id)
+        raise
+
     # suppress loguru records (including print capture) from disabled modules
     for name in disabled or []:
         loguru.logger.disable(name)

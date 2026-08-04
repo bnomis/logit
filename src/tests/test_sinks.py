@@ -1,11 +1,15 @@
+import io
 import os
 import typing
 
 import loguru
+import pytest
 
 import logit
 
 if typing.TYPE_CHECKING:
+    import pathlib
+
     import tests.fixtures.base
 
 
@@ -69,3 +73,24 @@ def test_default_mode_uses_shared_filenames(capture: tests.fixtures.base.LogCapt
 
     assert (capture.directory / 'log.log').exists()
     assert (capture.directory / 'log.jsonl').exists()
+
+
+def test_failed_sink_registration_leaves_no_sinks_registered(tmp_path: pathlib.Path) -> None:
+    """A mid-sequence OSError must roll back the stderr sink registered before it."""
+    if hasattr(os, 'geteuid') and os.geteuid() == 0:
+        pytest.skip('running as root, permissions are not enforced')
+
+    unwritable = tmp_path / 'unwritable'
+    unwritable.mkdir()
+    unwritable.chmod(0o500)
+    stderr = io.StringIO()
+
+    try:
+        with pytest.raises(OSError):
+            logit.setup_logger(directory=unwritable, stderr=stderr)
+        loguru.logger.info('should reach no sink')
+        loguru.logger.complete()
+        assert stderr.getvalue() == ''
+    finally:
+        unwritable.chmod(0o700)
+        logit.reset()
