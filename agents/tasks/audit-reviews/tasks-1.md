@@ -135,7 +135,7 @@ from `__all__`. No task needs further human input.
 
 ## Task 5: Use the full import path for loguru in `base.py`
 
-**Status:** todo
+**Status:** done
 **Priority:** medium
 **Complexity:** small
 **Source Reference:** Finding "`from loguru import logger` violates the full-import-path rule" (S4)
@@ -144,15 +144,15 @@ from `__all__`. No task needs further human input.
 
 **Subtasks:**
 
-- [ ] Replace `from loguru import logger` at `src/logit/base.py:11` with `import loguru`
-- [ ] Qualify all uses as `loguru.logger` (roughly 12 sites: `showwarning`, `InterceptHandler.emit`, `StreamToLogger.write`, `reset`, `setup_logger`)
-- [ ] Run `ruff check && ruff format --check`
+- [x] Replace `from loguru import logger` at `src/logit/base.py:11` with `import loguru`
+- [x] Qualify all uses as `loguru.logger` (roughly 12 sites: `showwarning`, `InterceptHandler.emit`, `StreamToLogger.write`, `reset`, `setup_logger`)
+- [x] Run `ruff check && ruff format --check`
 
 **Acceptance Criteria:**
 
-- [ ] `grep -rn "^from " src bin` returns only `src/logit/__init__.py`
-- [ ] `pytest -m "not slow"` passes
-- [ ] `ruff check` is clean
+- [x] `grep -rn "^from " src bin` returns only `src/logit/__init__.py`
+- [x] `pytest -m "not slow"` passes
+- [x] `ruff check` is clean
 
 **Notes:**
 

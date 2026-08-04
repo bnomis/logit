@@ -8,7 +8,7 @@ import sys
 import typing
 import warnings
 
-from loguru import logger
+import loguru
 
 showwarning_ = warnings.showwarning
 
@@ -64,15 +64,15 @@ def showwarning(message, category, filename, lineno, file=None, line=None):
         try:
             line = linecache.getline(filename, lineno)
         except OSError:
-            logger.debug(f'could not read source line from {filename}')
+            loguru.logger.debug(f'could not read source line from {filename}')
             line = None
 
     if line:
         line = line.strip()
 
-    logger.opt(depth=depth).warning(msg)
+    loguru.logger.opt(depth=depth).warning(msg)
     if line:
-        logger.opt(depth=depth).warning(f'  {line}')
+        loguru.logger.opt(depth=depth).warning(f'  {line}')
     # logger.warning(message)
     # showwarning_(message, category, filename, lineno, file=file, line=line)
 
@@ -82,7 +82,7 @@ class InterceptHandler(logging.Handler):
         # Get corresponding Loguru level if it exists.
         level: str | int
         try:
-            level = logger.level(record.levelname).name
+            level = loguru.logger.level(record.levelname).name
         except ValueError:
             level = record.levelno
 
@@ -92,7 +92,7 @@ class InterceptHandler(logging.Handler):
             frame = frame.f_back
             depth += 1
 
-        logger.opt(depth=depth, exception=record.exc_info).log(level, record.getMessage())
+        loguru.logger.opt(depth=depth, exception=record.exc_info).log(level, record.getMessage())
 
 
 def reset_disabled_logging() -> None:
@@ -164,7 +164,7 @@ class StreamToLogger:
 
     def write(self, buffer):
         for line in buffer.rstrip().splitlines():
-            logger.opt(depth=1).log(self.level, line.rstrip())
+            loguru.logger.opt(depth=1).log(self.level, line.rstrip())
 
     def flush(self):
         pass
@@ -209,12 +209,12 @@ def jsonl_file(directory: pathlib.Path | None = None, subprocess: bool = False) 
 def re_enable_disabled() -> None:
     """Undo the loguru side of a previous `disabled` list."""
     while disabled_:
-        logger.enable(disabled_.pop())
+        loguru.logger.enable(disabled_.pop())
 
 
 def reset() -> None:
     """Undo setup_logger: drop all sinks and restore the global state it mutated."""
-    logger.remove()
+    loguru.logger.remove()
     re_enable_disabled()
     reset_disabled_logging()
     warnings.showwarning = showwarning_
@@ -230,7 +230,7 @@ def setup_logger(
     subprocess: bool = False,
 ) -> None:
     # remove all handlers
-    logger.remove()
+    loguru.logger.remove()
     re_enable_disabled()
 
     take_over_logging(disabled=disabled)
@@ -239,19 +239,19 @@ def setup_logger(
     # dont need to take over stdout
     # logger.add(sys.__stdout__)
     # terminal/stderr
-    logger.add(
+    loguru.logger.add(
         stderr if stderr is not None else sys.__stderr__,  # type: ignore
         format='{time:YYYY-MM-DDTHH:mm:ss!UTC} <level>{level: <8}</level> {process.id} {thread.id} {file}:{line}/{function} {message}',
         enqueue=True,
     )  # type: ignore
     # log to file
-    logger.add(
+    loguru.logger.add(
         log_file(directory=directory, subprocess=subprocess),
         format='{time:YYYY-MM-DDTHH:mm:ss!UTC} {level: <8} {file}:{line}/{function} {message}',
         enqueue=True,
     )
     # log to jsonl
-    logger.add(
+    loguru.logger.add(
         jsonl_file(directory=directory, subprocess=subprocess),
         format='{time:YYYY-MM-DDTHH:mm:ss!UTC} {level: <8} {file}:{line}/{function} {message}',
         serialize=True,
@@ -259,5 +259,5 @@ def setup_logger(
     )
     # suppress loguru records (including print capture) from disabled modules
     for name in disabled or []:
-        logger.disable(name)
+        loguru.logger.disable(name)
         disabled_.append(name)
