@@ -16,6 +16,11 @@ showwarning_ = warnings.showwarning
 # disabled in order to undo it in reset()
 disabled_ = []
 
+# dictConfig only touches loggers named in its 'loggers' key, so a logger
+# disabled by an earlier config_logger_default() call stays disabled forever
+# unless we explicitly restore it - track what we disabled to undo it
+disabled_logging_ = []
+
 
 # def showwarning_orig(message, *args, **kwargs):
 #     # Find caller from where originated the logged message.
@@ -97,7 +102,23 @@ class InterceptHandler(logging.Handler):
         logger.opt(depth=depth, exception=record.exc_info).log(level, record.getMessage())
 
 
+def reset_disabled_logging() -> None:
+    """Undo the stdlib logging side of a previous `disabled` list.
+
+    dictConfig only reconfigures loggers it is told about, so a logger
+    disabled by a previous call is not restored just by leaving it out of the
+    next one - it has to be reset directly.
+    """
+    while disabled_logging_:
+        name = disabled_logging_.pop()
+        log = logging.getLogger(name)
+        log.handlers = []
+        log.level = logging.NOTSET
+        log.propagate = True
+
+
 def config_logger_default(disabled: list[str] | None = None) -> None:
+    reset_disabled_logging()
     default_handlers = [
         'loguru',
     ]
@@ -141,6 +162,7 @@ def config_logger_default(disabled: list[str] | None = None) -> None:
     }
 
     logging.config.dictConfig(config)
+    disabled_logging_.extend(disabled or [])
 
 
 class StreamToLogger:
@@ -191,11 +213,17 @@ def jsonl_file(directory: pathlib.Path | None = None, subprocess: bool = False) 
     return directory / 'log.jsonl'
 
 
+def re_enable_disabled() -> None:
+    """Undo the loguru side of a previous `disabled` list."""
+    while disabled_:
+        logger.enable(disabled_.pop())
+
+
 def reset() -> None:
     """Undo setup_logger: drop all sinks and restore the global state it mutated."""
     logger.remove()
-    while disabled_:
-        logger.enable(disabled_.pop())
+    re_enable_disabled()
+    reset_disabled_logging()
     warnings.showwarning = showwarning_
     warnings.resetwarnings()
     logging.captureWarnings(False)
@@ -210,6 +238,7 @@ def setup_logger(
 ) -> None:
     # remove all handlers
     logger.remove()
+    re_enable_disabled()
 
     take_over_logging(disabled=disabled)
     setup_warnings(disabled=disabled)

@@ -15,7 +15,7 @@ from `__all__`. No task needs further human input.
 
 ## Task 1: Re-enable previously disabled modules on re-setup
 
-**Status:** todo
+**Status:** done
 **Priority:** high
 **Complexity:** medium
 **Source Reference:** Finding "`disabled` state diverges across repeated `setup_logger` calls" (A5)
@@ -24,24 +24,25 @@ from `__all__`. No task needs further human input.
 
 **Subtasks:**
 
-- [ ] In `setup_logger`, drain `disabled_` (calling `logger.enable(name)` for each popped name) before applying the new `disabled` list, mirroring what `reset()` already does
-- [ ] Factor the drain into a small helper shared by `setup_logger` and `reset()` so the two cannot drift
-- [ ] Add `src/tests/test_selective.py::test_resetup_re_enables_the_previous_disabled_list` - disable `wanted`, call setup again disabling `unwanted`, run all emitters, assert `capture.names() == {WANTED, SOME_LIB}`
-- [ ] Extend the new test (or parametrise it over `PATHS`) so all five capture paths are checked, matching `test_every_capture_path_is_suppressed`
-- [ ] Add a test asserting `logit.base.disabled_` does not grow across repeated `setup_logger` calls
+- [x] In `setup_logger`, drain `disabled_` (calling `logger.enable(name)` for each popped name) before applying the new `disabled` list, mirroring what `reset()` already does
+- [x] Factor the drain into a small helper shared by `setup_logger` and `reset()` so the two cannot drift
+- [x] Add `src/tests/test_selective.py::test_resetup_re_enables_the_previous_disabled_list` - disable `wanted`, call setup again disabling `unwanted`, run all emitters, assert `capture.names() == {WANTED, SOME_LIB}`
+- [x] Extend the new test (or parametrise it over `PATHS`) so all five capture paths are checked, matching `test_every_capture_path_is_suppressed`
+- [x] Add a test asserting `logit.base.disabled_` does not grow across repeated `setup_logger` calls
 
 **Acceptance Criteria:**
 
-- [ ] `setup_logger(disabled=['a'])` followed by `setup_logger(disabled=['b'])` leaves `a` logging normally and only `b` silenced, on all five capture paths
-- [ ] `disabled_` contains exactly the names from the most recent call
-- [ ] `pytest src/tests/test_selective.py` passes
-- [ ] `pytest src/tests/test_warnings.py` still passes (`reset()` behaviour unchanged)
+- [x] `setup_logger(disabled=['a'])` followed by `setup_logger(disabled=['b'])` leaves `a` logging normally and only `b` silenced, on all five capture paths
+- [x] `disabled_` contains exactly the names from the most recent call
+- [x] `pytest src/tests/test_selective.py` passes
+- [x] `pytest src/tests/test_warnings.py` still passes (`reset()` behaviour unchanged)
 
 **Notes:**
 
 - Key file: `src/logit/base.py:194-202` (`reset`), `:205-241` (`setup_logger`)
 - The divergence is real and reproducible: `config_logger_default` rebuilds the whole dictConfig and `setup_warnings` calls `warnings.resetwarnings()`, so only the loguru path accumulates
 - AGENTS.md documents the three mechanisms as equivalent; this task is what makes that true
+- Correction found during implementation: the note above is wrong for the stdlib logging path. `dictConfig` only reconfigures loggers named in its `loggers` key, so a logger disabled by a previous call stayed disabled (`propagate=False`) even after a later call - including `reset()` - that did not name it. Fixed by adding a parallel `disabled_logging_` list and a `reset_disabled_logging()` helper that restores each previously-disabled stdlib logger directly before the next `dictConfig` call, called from both `config_logger_default` and `reset()`.
 
 ---
 

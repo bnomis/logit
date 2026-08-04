@@ -2,6 +2,7 @@ import warnings
 
 import pytest
 
+import logit.base
 import tests.emitters.some_lib
 import tests.emitters.unwanted
 import tests.emitters.wanted
@@ -104,3 +105,23 @@ def test_disabling_covers_submodules(setup):
     run_all(capture)
 
     assert capture.records() == []
+
+
+@pytest.mark.parametrize('template', PATHS)
+def test_resetup_re_enables_the_previous_disabled_list(setup, template):
+    """setup_logger must be idempotent with respect to `disabled` across calls."""
+    setup(disabled=[WANTED])
+    capture = setup(disabled=[UNWANTED])
+    run_all(capture)
+
+    assert capture.names() == {WANTED, SOME_LIB}
+    assert template.format(module='wanted') in capture.messages()
+    assert template.format(module='unwanted') not in capture.messages()
+
+
+def test_disabled_state_does_not_grow_across_repeated_setup_calls(setup):
+    setup(disabled=[WANTED])
+    setup(disabled=[UNWANTED])
+    setup(disabled=[SOME_LIB])
+
+    assert logit.base.disabled_ == [SOME_LIB]
