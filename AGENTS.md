@@ -31,13 +31,13 @@ The core logging architecture is in [src/logit/base.py](src/logit/base.py):
 4. **StreamToLogger**: Utility class that allows redirecting stdout/stderr to loguru using `contextlib.redirect_stdout/redirect_stderr`.
 
 5. **Multi-Output Configuration**:
-   - stderr: Human-readable colored output
+   - stderr: Human-readable coloured output
    - `log/log.log`: Plain text log file
    - `log/log.jsonl`: JSON Lines format for structured logging
 
 ### Module Structure
 
-- [src/logit/__init__.py](src/logit/__init__.py): public API re-exports (`__all__`)
+- [src/logit/**init**.py](src/logit/__init__.py): public API re-exports (`__all__`)
 - [src/logit/base.py](src/logit/base.py): Core logging setup and configuration
 - [bin/demo-logging.py](bin/demo-logging.py): visual demo of every capture path, run via [bin/demo-logging.sh](bin/demo-logging.sh)
 - [src/tests/conftest.py](src/tests/conftest.py): `capture` and `setup` fixtures shared across the test suite
@@ -56,7 +56,7 @@ The `capture` fixture configures logit into a `tmp_path` and hands back a
 `subprocess`. Both restore the global loguru/logging/warnings state on teardown.
 
 | File | Covers |
-|---|---|
+| --- | --- |
 | `test_sinks.py` | one record reaching stderr, `log.log` and `log.jsonl` consistently |
 | `test_intercept.py` | stdlib `logging` -> loguru: level mapping, attribution, `exc_info` |
 | `test_streams.py` | `print()` / stdout / stderr via `StreamToLogger` |

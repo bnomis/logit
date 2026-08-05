@@ -16,6 +16,8 @@ import loguru
 
 showwarning_ = warnings.showwarning
 
+DEFAULT_LEVEL = 'DEBUG'
+
 RECORD_FORMAT = '{time:YYYY-MM-DDTHH:mm:ss!UTC} {level: <8} {file}:{line}/{function} {message}'
 STDERR_FORMAT = RECORD_FORMAT.replace('{level: <8}', '<level>{level: <8}</level>').replace('{file}', '{process.id} {thread.id} {file}')
 
@@ -240,7 +242,21 @@ def setup_logger(
     stderr: typing.TextIO | None = None,
     disabled: list[str] | None = None,
     subprocess: bool = False,
+    level: str = DEFAULT_LEVEL,
+    diagnose: bool = False,
 ) -> None:
+    """Install the stderr, log file and jsonl sinks.
+
+    Args:
+        directory: Where the file sinks are written. Defaults to log_dir().
+        stderr: Stream for the terminal sink. Defaults to sys.__stderr__.
+        disabled: Dotted module names to silence across every capture path.
+        subprocess: Give this process its own per-pid file names.
+        level: Minimum level emitted by every sink.
+        diagnose: Whether loguru annotates traceback lines with the values of
+            the expressions on them. Off by default: those values include
+            request parameters and API keys, and the file sinks persist them.
+    """
     # remove all handlers
     loguru.logger.remove()
     re_enable_disabled()
@@ -257,6 +273,8 @@ def setup_logger(
             loguru.logger.add(
                 stderr if stderr is not None else sys.__stderr__,  # type: ignore
                 format=STDERR_FORMAT,
+                level=level,
+                diagnose=diagnose,
                 enqueue=True,
             )
         )  # type: ignore
@@ -265,6 +283,8 @@ def setup_logger(
             loguru.logger.add(
                 log_file(directory=directory, subprocess=subprocess),
                 format=RECORD_FORMAT,
+                level=level,
+                diagnose=diagnose,
                 enqueue=True,
             )
         )
@@ -273,6 +293,8 @@ def setup_logger(
             loguru.logger.add(
                 jsonl_file(directory=directory, subprocess=subprocess),
                 format=RECORD_FORMAT,
+                level=level,
+                diagnose=diagnose,
                 serialize=True,
                 enqueue=True,
             )

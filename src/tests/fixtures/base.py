@@ -69,6 +69,12 @@ class LogCapture:
         path = logit.log_file(directory=self.directory, subprocess=self.subprocess)
         return path.read_text() if path.exists() else ''
 
+    def jsonl_text(self) -> str:
+        """Raw jsonl sink contents, for asserting on what was serialised."""
+        self.complete()
+        path = logit.jsonl_file(directory=self.directory, subprocess=self.subprocess)
+        return path.read_text() if path.exists() else ''
+
     def stderr(self) -> str:
         self.complete()
         return self.stderr_stream.getvalue()

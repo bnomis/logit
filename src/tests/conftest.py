@@ -6,6 +6,7 @@ import typing
 import pytest
 
 import logit
+import logit.base
 import tests.fixtures.base
 
 if typing.TYPE_CHECKING:
@@ -32,8 +33,17 @@ def make_capture(
     stderr: io.StringIO,
     disabled: list[str] | None = None,
     subprocess: bool = False,
+    level: str = logit.base.DEFAULT_LEVEL,
+    diagnose: bool = False,
 ) -> tests.fixtures.base.LogCapture:
-    logit.setup_logger(directory=directory, stderr=stderr, disabled=disabled, subprocess=subprocess)
+    logit.setup_logger(
+        directory=directory,
+        stderr=stderr,
+        disabled=disabled,
+        subprocess=subprocess,
+        level=level,
+        diagnose=diagnose,
+    )
     return tests.fixtures.base.LogCapture(directory, stderr, subprocess=subprocess)
 
 
@@ -43,8 +53,20 @@ def setup(tmp_path: pathlib.Path) -> typing.Generator[typing.Callable[..., tests
     stdout_, stderr_ = sys.stdout, sys.stderr
     handlers_ = logging.root.handlers[:]
 
-    def build(disabled: list[str] | None = None, subprocess: bool = False) -> tests.fixtures.base.LogCapture:
-        return make_capture(tmp_path, io.StringIO(), disabled=disabled, subprocess=subprocess)
+    def build(
+        disabled: list[str] | None = None,
+        subprocess: bool = False,
+        level: str = logit.base.DEFAULT_LEVEL,
+        diagnose: bool = False,
+    ) -> tests.fixtures.base.LogCapture:
+        return make_capture(
+            tmp_path,
+            io.StringIO(),
+            disabled=disabled,
+            subprocess=subprocess,
+            level=level,
+            diagnose=diagnose,
+        )
 
     yield build
     logit.reset()

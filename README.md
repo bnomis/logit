@@ -21,8 +21,25 @@ logit.setup_logger(
     stderr=None,          # defaults to sys.__stderr__
     disabled=[],          # dotted module names to silence
     subprocess=False,     # per-pid file names instead of shared ones
+    level='DEBUG',        # minimum level emitted by every sink
+    diagnose=False,       # render frame values in tracebacks
 )
 ```
+
+`level` applies to all three sinks at once.
+
+`diagnose` controls whether loguru annotates traceback lines with the values
+of the expressions on them. It defaults to `False`, unlike loguru itself,
+because those values include request parameters and API keys and the file
+sinks persist them:
+
+```text
+    |                              L {'apikey': 'SECRET-KEY-abc123', ...}
+```
+
+Turning it on is useful for local debugging. The traceback, the exception
+type and the call stack are reported either way; only the values are
+withheld.
 
 `setup_logger` intercepts stdlib `logging`, Python `warnings`, and installs
 three loguru sinks:
