@@ -21,12 +21,19 @@ logit.setup_logger(
     stderr=None,          # defaults to sys.__stderr__
     disabled=[],          # dotted module names to silence
     subprocess=False,     # per-pid file names instead of shared ones
-    level='DEBUG',        # minimum level emitted by every sink
+    level='DEBUG',        # minimum level emitted by the file sinks
+    stderr_level=None,    # terminal level; defaults to `level`
     diagnose=False,       # render frame values in tracebacks
 )
 ```
 
-`level` applies to all three sinks at once.
+`level` sets the file sinks. `stderr_level` sets the terminal sink and
+defaults to `level`, so the two move together unless you separate them.
+
+Setting `stderr_level` higher than `level` keeps the terminal to a summary
+while the files still record everything. That is usually what an audit trail
+wants: a CLI can print a one-line error and still keep the full traceback on
+disk, without having to interpolate the cause into the message.
 
 `diagnose` controls whether loguru annotates traceback lines with the values
 of the expressions on them. It defaults to `False`, unlike loguru itself,

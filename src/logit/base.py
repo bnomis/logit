@@ -243,6 +243,7 @@ def setup_logger(
     disabled: list[str] | None = None,
     subprocess: bool = False,
     level: str = DEFAULT_LEVEL,
+    stderr_level: str | None = None,
     diagnose: bool = False,
 ) -> None:
     """Install the stderr, log file and jsonl sinks.
@@ -252,11 +253,18 @@ def setup_logger(
         stderr: Stream for the terminal sink. Defaults to sys.__stderr__.
         disabled: Dotted module names to silence across every capture path.
         subprocess: Give this process its own per-pid file names.
-        level: Minimum level emitted by every sink.
+        level: Minimum level emitted by the file sinks.
+        stderr_level: Minimum level emitted by the terminal sink. Defaults to
+            `level`. Setting it higher keeps the terminal to a summary while
+            the files still record everything, which is what an audit trail
+            wants: detail a user should not have to read, kept anyway.
         diagnose: Whether loguru annotates traceback lines with the values of
             the expressions on them. Off by default: those values include
             request parameters and API keys, and the file sinks persist them.
     """
+    if stderr_level is None:
+        stderr_level = level
+
     # remove all handlers
     loguru.logger.remove()
     re_enable_disabled()
@@ -273,7 +281,7 @@ def setup_logger(
             loguru.logger.add(
                 stderr if stderr is not None else sys.__stderr__,  # type: ignore
                 format=STDERR_FORMAT,
-                level=level,
+                level=stderr_level,
                 diagnose=diagnose,
                 enqueue=True,
             )

@@ -34,6 +34,7 @@ def make_capture(
     disabled: list[str] | None = None,
     subprocess: bool = False,
     level: str = logit.base.DEFAULT_LEVEL,
+    stderr_level: str | None = None,
     diagnose: bool = False,
 ) -> tests.fixtures.base.LogCapture:
     logit.setup_logger(
@@ -42,6 +43,7 @@ def make_capture(
         disabled=disabled,
         subprocess=subprocess,
         level=level,
+        stderr_level=stderr_level,
         diagnose=diagnose,
     )
     return tests.fixtures.base.LogCapture(directory, stderr, subprocess=subprocess)
@@ -57,6 +59,7 @@ def setup(tmp_path: pathlib.Path) -> typing.Generator[typing.Callable[..., tests
         disabled: list[str] | None = None,
         subprocess: bool = False,
         level: str = logit.base.DEFAULT_LEVEL,
+        stderr_level: str | None = None,
         diagnose: bool = False,
     ) -> tests.fixtures.base.LogCapture:
         return make_capture(
@@ -65,6 +68,7 @@ def setup(tmp_path: pathlib.Path) -> typing.Generator[typing.Callable[..., tests
             disabled=disabled,
             subprocess=subprocess,
             level=level,
+            stderr_level=stderr_level,
             diagnose=diagnose,
         )
 

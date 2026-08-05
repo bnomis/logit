@@ -98,3 +98,47 @@ def test_level_defaults_to_debug(setup: typing.Callable[..., tests.fixtures.base
     capture.complete()
 
     assert 'a debug' in capture.messages()
+
+
+class TestStderrLevel:
+    """The terminal can be quieter than the files."""
+
+    def test_stderr_level_defaults_to_level(self, setup: typing.Callable[..., tests.fixtures.base.LogCapture]) -> None:
+        """Omitting stderr_level keeps every sink on the same level."""
+        capture = setup(level='WARNING')
+        loguru.logger.info('an info')
+        loguru.logger.warning('a warning')
+        capture.complete()
+
+        assert 'an info' not in capture.stderr()
+        assert 'an info' not in capture.text()
+        assert 'a warning' in capture.stderr()
+
+    def test_files_can_record_more_than_the_terminal(self, setup: typing.Callable[..., tests.fixtures.base.LogCapture]) -> None:
+        """A quieter terminal still leaves a complete audit trail on disk."""
+        capture = setup(level='DEBUG', stderr_level='INFO')
+        loguru.logger.debug('a debug')
+        loguru.logger.info('an info')
+        capture.complete()
+
+        assert 'a debug' not in capture.stderr()
+        assert 'a debug' in capture.text()
+        assert 'a debug' in capture.messages()
+        assert 'an info' in capture.stderr()
+
+    def test_an_exception_reaches_the_files_only(self, setup: typing.Callable[..., tests.fixtures.base.LogCapture]) -> None:
+        """A traceback logged below the terminal level is still recorded.
+
+        This is what lets a CLI show a one-line error while keeping the full
+        cause in the audit trail.
+        """
+        capture = setup(level='DEBUG', stderr_level='INFO')
+        try:
+            raise ValueError('the underlying cause')
+        except ValueError:
+            loguru.logger.opt(exception=True).debug('command failed')
+        capture.complete()
+
+        assert 'command failed' not in capture.stderr()
+        assert 'the underlying cause' not in capture.stderr()
+        assert 'the underlying cause' in capture.text()
