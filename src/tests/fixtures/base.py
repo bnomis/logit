@@ -1,12 +1,14 @@
 import contextlib
-import io
 import json
-import pathlib
 import typing
 
 import loguru
 
 import logit
+
+if typing.TYPE_CHECKING:
+    import io
+    import pathlib
 
 
 class LogCapture:
@@ -20,6 +22,8 @@ class LogCapture:
         self.directory = directory
         self.stderr_stream = stderr
         self.subprocess = subprocess
+        self.records_cache: list[dict] = []
+        self.records_cache_stat: tuple[int, int] | None = None
 
     def complete(self) -> None:
         # every sink uses enqueue=True and writes from a background thread
@@ -29,8 +33,16 @@ class LogCapture:
         self.complete()
         path = logit.jsonl_file(directory=self.directory, subprocess=self.subprocess)
         if not path.exists():
-            return []
-        return [json.loads(line)['record'] for line in path.read_text().splitlines() if line.strip()]
+            self.records_cache = []
+            self.records_cache_stat = None
+            return self.records_cache
+
+        stat = path.stat()
+        cache_stat = (stat.st_mtime_ns, stat.st_size)
+        if cache_stat != self.records_cache_stat:
+            self.records_cache = [json.loads(line)['record'] for line in path.read_text().splitlines() if line.strip()]
+            self.records_cache_stat = cache_stat
+        return self.records_cache
 
     def messages(self) -> list[str]:
         return [r['message'] for r in self.records()]
@@ -39,9 +51,11 @@ class LogCapture:
         return {r['name'] for r in self.records()}
 
     def find(self, message: str) -> dict:
-        matches = [r for r in self.records() if r['message'] == message]
+        records = self.records()
+        matches = [r for r in records if r['message'] == message]
         if len(matches) != 1:
-            raise AssertionError(f'expected exactly 1 record with message {message!r}, got {len(matches)}: {self.messages()}')
+            messages = [r['message'] for r in records]
+            raise AssertionError(f'expected exactly 1 record with message {message!r}, got {len(matches)}: {messages}')
         return matches[0]
 
     def matching(self, substring: str) -> list[dict]:

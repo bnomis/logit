@@ -1,9 +1,13 @@
 import inspect
 import logging
+import typing
 
 import pytest
 
 import tests.emitters.wanted
+
+if typing.TYPE_CHECKING:
+    import tests.fixtures.base
 
 LEVELS = [
     ('debug', 'DEBUG'),
@@ -15,14 +19,14 @@ LEVELS = [
 
 
 @pytest.mark.parametrize(('method', 'level'), LEVELS)
-def test_stdlib_level_maps_to_loguru_level(capture, method, level):
+def test_stdlib_level_maps_to_loguru_level(capture: tests.fixtures.base.LogCapture, method: str, level: str) -> None:
     logger = logging.getLogger('tests.emitters.wanted')
     getattr(logger, method)(f'stdlib {method}')
 
     assert capture.find(f'stdlib {method}')['level']['name'] == level
 
 
-def test_record_is_attributed_to_the_emitting_module(capture):
+def test_record_is_attributed_to_the_emitting_module(capture: tests.fixtures.base.LogCapture) -> None:
     tests.emitters.wanted.func()
 
     record = capture.find('This is an info message from wanted.py')
@@ -30,7 +34,7 @@ def test_record_is_attributed_to_the_emitting_module(capture):
     assert record['module'] == 'wanted'
 
 
-def test_source_location_is_the_caller_not_the_interceptor(capture):
+def test_source_location_is_the_caller_not_the_interceptor(capture: tests.fixtures.base.LogCapture) -> None:
     """The frame-depth walk in InterceptHandler.emit is what this protects."""
     logger = logging.getLogger('tests.emitters.wanted')
     expected_line = inspect.currentframe().f_lineno + 1
@@ -43,7 +47,7 @@ def test_source_location_is_the_caller_not_the_interceptor(capture):
     assert 'logging/__init__.py' not in record['file']['path']
 
 
-def test_location_points_into_the_emitting_module(capture):
+def test_location_points_into_the_emitting_module(capture: tests.fixtures.base.LogCapture) -> None:
     tests.emitters.wanted.func()
 
     record = capture.find('This is a debug message from wanted.py')
@@ -51,7 +55,7 @@ def test_location_points_into_the_emitting_module(capture):
     assert record['function'] == 'func'
 
 
-def test_exception_info_is_carried_through(capture):
+def test_exception_info_is_carried_through(capture: tests.fixtures.base.LogCapture) -> None:
     logger = logging.getLogger('tests.emitters.wanted')
     try:
         raise ValueError('boom')
@@ -65,7 +69,7 @@ def test_exception_info_is_carried_through(capture):
     assert 'boom' in capture.text()
 
 
-def test_unknown_level_falls_back_to_the_numeric_level(capture):
+def test_unknown_level_falls_back_to_the_numeric_level(capture: tests.fixtures.base.LogCapture) -> None:
     """logger.level() raises for unregistered names, so emit() uses levelno."""
     logging.addLevelName(25, 'NOTICE')
     logger = logging.getLogger('tests.emitters.wanted')
@@ -75,14 +79,14 @@ def test_unknown_level_falls_back_to_the_numeric_level(capture):
     assert record['level']['no'] == 25
 
 
-def test_root_logger_is_intercepted(capture):
+def test_root_logger_is_intercepted(capture: tests.fixtures.base.LogCapture) -> None:
     logging.getLogger('some.third.party').info('from a library')
 
     record = capture.find('from a library')
     assert record['level']['name'] == 'INFO'
 
 
-def test_stdlib_formatting_args_are_resolved(capture):
+def test_stdlib_formatting_args_are_resolved(capture: tests.fixtures.base.LogCapture) -> None:
     logging.getLogger('tests.emitters.wanted').info('value is %s and %d', 'x', 7)
 
     assert capture.find('value is x and 7')

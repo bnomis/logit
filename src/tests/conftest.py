@@ -1,6 +1,5 @@
 import io
 import logging
-import pathlib
 import sys
 import typing
 
@@ -8,6 +7,9 @@ import pytest
 
 import logit
 import tests.fixtures.base
+
+if typing.TYPE_CHECKING:
+    import pathlib
 
 
 @pytest.fixture

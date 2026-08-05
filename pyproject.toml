@@ -1,13 +1,17 @@
 [project]
 name = "logit"
 version = "0.1.0"
-description = "Testing loguru and logging"
+description = "A loguru wrapper."
 readme = "README.md"
 requires-python = ">=3.14"
-dependencies = ["joblib>=1.5.3", "loguru>=0.7.3"]
+dependencies = ["loguru>=0.7.3"]
 
 [dependency-groups]
-dev = ["pytest>=9.1.1"]
+dev = [
+    "hypothesis>=6.158.1",
+    "joblib>=1.5.3",
+    "pytest>=9.1.1",
+]
 
 
 [tool.pytest.ini_options]

@@ -5,7 +5,7 @@ import warnings
 logger = logging.getLogger(__name__)
 
 
-def func():
+def func() -> None:
     logger.debug('This is a debug message from wanted.py')
     logger.info('This is an info message from wanted.py')
     logger.warning('This is a warning message from wanted.py')

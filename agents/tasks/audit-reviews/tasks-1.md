@@ -15,7 +15,7 @@ from `__all__`. No task needs further human input.
 
 ## Task 1: Re-enable previously disabled modules on re-setup
 
-**Status:** todo
+**Status:** done
 **Priority:** high
 **Complexity:** medium
 **Source Reference:** Finding "`disabled` state diverges across repeated `setup_logger` calls" (A5)
@@ -24,30 +24,31 @@ from `__all__`. No task needs further human input.
 
 **Subtasks:**
 
-- [ ] In `setup_logger`, drain `disabled_` (calling `logger.enable(name)` for each popped name) before applying the new `disabled` list, mirroring what `reset()` already does
-- [ ] Factor the drain into a small helper shared by `setup_logger` and `reset()` so the two cannot drift
-- [ ] Add `src/tests/test_selective.py::test_resetup_re_enables_the_previous_disabled_list` - disable `wanted`, call setup again disabling `unwanted`, run all emitters, assert `capture.names() == {WANTED, SOME_LIB}`
-- [ ] Extend the new test (or parametrise it over `PATHS`) so all five capture paths are checked, matching `test_every_capture_path_is_suppressed`
-- [ ] Add a test asserting `logit.base.disabled_` does not grow across repeated `setup_logger` calls
+- [x] In `setup_logger`, drain `disabled_` (calling `logger.enable(name)` for each popped name) before applying the new `disabled` list, mirroring what `reset()` already does
+- [x] Factor the drain into a small helper shared by `setup_logger` and `reset()` so the two cannot drift
+- [x] Add `src/tests/test_selective.py::test_resetup_re_enables_the_previous_disabled_list` - disable `wanted`, call setup again disabling `unwanted`, run all emitters, assert `capture.names() == {WANTED, SOME_LIB}`
+- [x] Extend the new test (or parametrise it over `PATHS`) so all five capture paths are checked, matching `test_every_capture_path_is_suppressed`
+- [x] Add a test asserting `logit.base.disabled_` does not grow across repeated `setup_logger` calls
 
 **Acceptance Criteria:**
 
-- [ ] `setup_logger(disabled=['a'])` followed by `setup_logger(disabled=['b'])` leaves `a` logging normally and only `b` silenced, on all five capture paths
-- [ ] `disabled_` contains exactly the names from the most recent call
-- [ ] `pytest src/tests/test_selective.py` passes
-- [ ] `pytest src/tests/test_warnings.py` still passes (`reset()` behaviour unchanged)
+- [x] `setup_logger(disabled=['a'])` followed by `setup_logger(disabled=['b'])` leaves `a` logging normally and only `b` silenced, on all five capture paths
+- [x] `disabled_` contains exactly the names from the most recent call
+- [x] `pytest src/tests/test_selective.py` passes
+- [x] `pytest src/tests/test_warnings.py` still passes (`reset()` behaviour unchanged)
 
 **Notes:**
 
 - Key file: `src/logit/base.py:194-202` (`reset`), `:205-241` (`setup_logger`)
 - The divergence is real and reproducible: `config_logger_default` rebuilds the whole dictConfig and `setup_warnings` calls `warnings.resetwarnings()`, so only the loguru path accumulates
 - AGENTS.md documents the three mechanisms as equivalent; this task is what makes that true
+- Correction found during implementation: the note above is wrong for the stdlib logging path. `dictConfig` only reconfigures loggers named in its `loggers` key, so a logger disabled by a previous call stayed disabled (`propagate=False`) even after a later call - including `reset()` - that did not name it. Fixed by adding a parallel `disabled_logging_` list and a `reset_disabled_logging()` helper that restores each previously-disabled stdlib logger directly before the next `dictConfig` call, called from both `config_logger_default` and `reset()`.
 
 ---
 
 ## Task 2: Delete the dead `LoguruHandler` class
 
-**Status:** todo
+**Status:** done
 **Priority:** medium
 **Complexity:** small
 **Source Reference:** Finding "dead `LoguruHandler` class" (T1)
@@ -56,14 +57,14 @@ from `__all__`. No task needs further human input.
 
 **Subtasks:**
 
-- [ ] Delete `LoguruHandler` from `src/logit/base.py:77-79`
-- [ ] Confirm with grep that nothing under `src/`, `bin/` or the dictConfig at `src/logit/base.py:119-128` references it
+- [x] Delete `LoguruHandler` from `src/logit/base.py:77-79`
+- [x] Confirm with grep that nothing under `src/`, `bin/` or the dictConfig at `src/logit/base.py:119-128` references it
 
 **Acceptance Criteria:**
 
-- [ ] `grep -rn LoguruHandler src bin` returns nothing
-- [ ] `pytest -m "not slow"` passes
-- [ ] The `legacy-formatting-format` hit at `src/logit/base.py:79` no longer appears in the audit script output
+- [x] `grep -rn LoguruHandler src bin` returns nothing
+- [x] `pytest -m "not slow"` passes
+- [x] The `legacy-formatting-format` hit at `src/logit/base.py:79` no longer appears in the audit script output
 
 **Notes:**
 
@@ -74,7 +75,7 @@ from `__all__`. No task needs further human input.
 
 ## Task 3: Narrow the silent broad `except` around the source-line lookup
 
-**Status:** todo
+**Status:** done
 **Priority:** medium
 **Complexity:** small
 **Source Reference:** Finding "silent broad `except` around `linecache.getline`" (mechanical `silent-broad-except`, A19)
@@ -83,29 +84,30 @@ from `__all__`. No task needs further human input.
 
 **Subtasks:**
 
-- [ ] Change `except Exception:` at `src/logit/base.py:61` to `except OSError:`
-- [ ] Remove the `linecache = None` rebind (the name is never read again)
-- [ ] Add `logger.debug` on the failure path recording the path that could not be read
-- [ ] Add a test covering the failure branch - e.g. `warnings.showwarning(..., filename=str(tmp_path))` where the path is a directory - asserting the warning record is still emitted without a source line
+- [x] Change `except Exception:` at `src/logit/base.py:61` to `except OSError:`
+- [x] Remove the `linecache = None` rebind (the name is never read again)
+- [x] Add `logger.debug` on the failure path recording the path that could not be read
+- [x] Add a test covering the failure branch - e.g. `warnings.showwarning(..., filename=str(tmp_path))` where the path is a directory - asserting the warning record is still emitted without a source line
 
 **Acceptance Criteria:**
 
-- [ ] `KeyboardInterrupt` / `MemoryError` raised during the lookup are no longer swallowed
-- [ ] An unreadable filename still produces the warning record and no source-line record
-- [ ] `pytest src/tests/test_warnings.py` passes
-- [ ] The `silent-broad-except` hit no longer appears in the audit script output
+- [x] `KeyboardInterrupt` / `MemoryError` raised during the lookup are no longer swallowed
+- [x] An unreadable filename still produces the warning record and no source-line record
+- [x] `pytest src/tests/test_warnings.py` passes
+- [x] The `silent-broad-except` hit no longer appears in the audit script output
 
 **Notes:**
 
 - Key file: `src/logit/base.py:56-65`
 - The `else: line = line` branch on lines 64-65 is a no-op self-assignment; drop it while you are in there
 - Related: Task 10 hoists the `import linecache` on line 58 out of the function
+- Correction found during implementation: CPython's `linecache.updatecache` already wraps its own `os.stat`/`open` calls in `except OSError: return []`, so `linecache.getline` never raises `OSError` for an unreadable path - a directory `filename` just yields `''` without touching our `except` clause. The regression test uses `monkeypatch.setattr('linecache.getline', ...)` to force the `OSError` directly instead, so the branch is actually exercised.
 
 ---
 
 ## Task 4: Rename `StreamToLogger._level` to `level`
 
-**Status:** todo
+**Status:** done
 **Priority:** medium
 **Complexity:** small
 **Source Reference:** Mechanical rules `leading-underscore-self`, `leading-underscore-attribute-access`
@@ -114,25 +116,26 @@ from `__all__`. No task needs further human input.
 
 **Subtasks:**
 
-- [ ] Rename the attribute at `src/logit/base.py:148` and its use at `:152`
-- [ ] Grep `src/` and `bin/` for `_level` to confirm no external reader
+- [x] Rename the attribute at `src/logit/base.py:148` and its use at `:152`
+- [x] Grep `src/` and `bin/` for `_level` to confirm no external reader
 
 **Acceptance Criteria:**
 
-- [ ] `grep -rn "_level" src bin` returns nothing
-- [ ] `pytest src/tests/test_streams.py` passes
-- [ ] Both `leading-underscore-*` rules return zero hits from the audit script
+- [x] `grep -rn "_level" src bin` returns nothing
+- [x] `pytest src/tests/test_streams.py` passes
+- [x] Both `leading-underscore-*` rules return zero hits from the audit script
 
 **Notes:**
 
 - Key file: `src/logit/base.py:146-155`
 - The constructor parameter is already named `level`, so the rename removes the mismatch rather than creating one
+- Correction found during implementation: `grep -rn "_level" src bin` does not literally return nothing - it matches pre-existing test function names containing the substring (e.g. `test_stream_level_is_configurable`, `test_stdlib_level_maps_to_loguru_level`). None of these reference the `StreamToLogger._level` attribute; the intent of the criterion (no leftover attribute reference) is satisfied
 
 ---
 
 ## Task 5: Use the full import path for loguru in `base.py`
 
-**Status:** todo
+**Status:** done
 **Priority:** medium
 **Complexity:** small
 **Source Reference:** Finding "`from loguru import logger` violates the full-import-path rule" (S4)
@@ -141,15 +144,15 @@ from `__all__`. No task needs further human input.
 
 **Subtasks:**
 
-- [ ] Replace `from loguru import logger` at `src/logit/base.py:11` with `import loguru`
-- [ ] Qualify all uses as `loguru.logger` (roughly 12 sites: `showwarning`, `InterceptHandler.emit`, `StreamToLogger.write`, `reset`, `setup_logger`)
-- [ ] Run `ruff check && ruff format --check`
+- [x] Replace `from loguru import logger` at `src/logit/base.py:11` with `import loguru`
+- [x] Qualify all uses as `loguru.logger` (roughly 12 sites: `showwarning`, `InterceptHandler.emit`, `StreamToLogger.write`, `reset`, `setup_logger`)
+- [x] Run `ruff check && ruff format --check`
 
 **Acceptance Criteria:**
 
-- [ ] `grep -rn "^from " src bin` returns only `src/logit/__init__.py`
-- [ ] `pytest -m "not slow"` passes
-- [ ] `ruff check` is clean
+- [x] `grep -rn "^from " src bin` returns only `src/logit/__init__.py`
+- [x] `pytest -m "not slow"` passes
+- [x] `ruff check` is clean
 
 **Notes:**
 
@@ -161,7 +164,7 @@ from `__all__`. No task needs further human input.
 
 ## Task 6: Move annotation-only imports into TYPE_CHECKING blocks
 
-**Status:** todo
+**Status:** done
 **Priority:** low
 **Complexity:** small
 **Source Reference:** Finding "annotation-only imports outside TYPE_CHECKING" (S4)
@@ -170,27 +173,28 @@ from `__all__`. No task needs further human input.
 
 **Subtasks:**
 
-- [ ] `src/logit/base.py:8` - `typing` is used only in `stderr: typing.TextIO | None`; move it (keep `pathlib`, used at runtime by `this_dir`)
-- [ ] `src/tests/conftest.py:3,5` - move `pathlib` and `typing` (keep `io`, `logging`, `sys`, used at runtime)
-- [ ] `src/tests/fixtures/base.py:4,5` - move `pathlib` and `typing` (keep `io`, used at runtime by nothing but the annotation - verify before moving; `contextlib` and `json` stay)
-- [ ] Use the same idiom in all three files so a convention exists for the tree
+- [x] `src/logit/base.py:8` - `typing` is used only in `stderr: typing.TextIO | None`; move it (keep `pathlib`, used at runtime by `this_dir`)
+- [x] `src/tests/conftest.py:3,5` - move `pathlib` and `typing` (keep `io`, `logging`, `sys`, used at runtime)
+- [x] `src/tests/fixtures/base.py:4,5` - move `pathlib` and `typing` (keep `io`, used at runtime by nothing but the annotation - verify before moving; `contextlib` and `json` stay)
+- [x] Use the same idiom in all three files so a convention exists for the tree
 
 **Acceptance Criteria:**
 
-- [ ] Every remaining module-level import is referenced outside an annotation
-- [ ] `pytest -m "not slow"` passes (annotations are lazily evaluated on 3.14, so nothing should break)
-- [ ] `ruff check` is clean
+- [x] Every remaining module-level import is referenced outside an annotation
+- [x] `pytest -m "not slow"` passes (annotations are lazily evaluated on 3.14, so nothing should break)
+- [x] `ruff check` is clean
 
 **Notes:**
 
 - Depends on Task 5 (both touch the `base.py` import block)
 - Python 3.14 evaluates annotations lazily, so no `from __future__ import annotations` is needed - and the standard forbids adding it
+- Correction found during implementation: `import typing` cannot itself be moved into `if typing.TYPE_CHECKING:` in any of the three files - the guard's condition is `typing.TYPE_CHECKING`, so `typing` must already be imported unconditionally to write the guard at all. In `base.py`, `typing` is the only annotation-only import candidate, so there is nothing to guard and the import stays exactly as it was. In `conftest.py` and `fixtures/base.py`, `typing` stays unconditional (it both enables the guard and is itself used in annotations there), while `pathlib` (both files) and `io` (`fixtures/base.py` only, confirmed to have no runtime use beyond the `stderr: io.StringIO` annotation) move inside `if typing.TYPE_CHECKING:` blocks
 
 ---
 
 ## Task 7: Annotate the package and demo signatures
 
-**Status:** todo
+**Status:** done
 **Priority:** medium
 **Complexity:** small
 **Source Reference:** Finding "missing type annotations across the tree" (S1) - package and `bin/` portion
@@ -199,16 +203,16 @@ from `__all__`. No task needs further human input.
 
 **Subtasks:**
 
-- [ ] `src/logit/base.py:46` `showwarning` - annotate all six parameters and `-> None`, mirroring `warnings.showwarning`'s signature (`message: Warning | str`, `category: type[Warning]`, `filename: str`, `lineno: int`, `file: typing.TextIO | None`, `line: str | None`)
-- [ ] `src/logit/base.py:147,150,154` - annotate `StreamToLogger.__init__`, `write` and `flush`
-- [ ] `bin/demo-logging.py:24,42,49,58,63,74,85` - add `-> None` to all seven functions
-- [ ] Run `ruff check && ruff format --check`
+- [x] `src/logit/base.py:46` `showwarning` - annotate all six parameters and `-> None`, mirroring `warnings.showwarning`'s signature (`message: Warning | str`, `category: type[Warning]`, `filename: str`, `lineno: int`, `file: typing.TextIO | None`, `line: str | None`)
+- [x] `src/logit/base.py:147,150,154` - annotate `StreamToLogger.__init__`, `write` and `flush`
+- [x] `bin/demo-logging.py:24,42,49,58,63,74,85` - add `-> None` to all seven functions
+- [x] Run `ruff check && ruff format --check`
 
 **Acceptance Criteria:**
 
-- [ ] An AST walk over `src/logit/` and `bin/` reports zero signatures missing parameter or return annotations
-- [ ] `pytest -m "not slow"` passes
-- [ ] `bin/demo-logging.sh` still runs end to end
+- [x] An AST walk over `src/logit/` and `bin/` reports zero signatures missing parameter or return annotations
+- [x] `pytest -m "not slow"` passes
+- [x] `bin/demo-logging.sh` still runs end to end
 
 **Notes:**
 
@@ -220,7 +224,7 @@ from `__all__`. No task needs further human input.
 
 ## Task 8: Annotate the test and emitter signatures
 
-**Status:** todo
+**Status:** done
 **Priority:** low
 **Complexity:** medium
 **Source Reference:** Finding "missing type annotations across the tree" (S1) - test portion
@@ -229,15 +233,15 @@ from `__all__`. No task needs further human input.
 
 **Subtasks:**
 
-- [ ] `src/tests/emitters/{some_lib,unwanted,wanted}.py:8` - add `-> None` to `func`
-- [ ] Annotate every test function's fixture parameters and `-> None`: `capture: tests.fixtures.base.LogCapture`, `setup: typing.Callable[..., tests.fixtures.base.LogCapture]` (the types are already spelled out in `src/tests/conftest.py:14,39`)
-- [ ] Annotate parametrised arguments (`method`, `level`, `template`, `name`) and the `run_all` helper at `src/tests/test_selective.py:20`
-- [ ] Run `ruff check && ruff format --check`
+- [x] `src/tests/emitters/{some_lib,unwanted,wanted}.py:8` - add `-> None` to `func`
+- [x] Annotate every test function's fixture parameters and `-> None`: `capture: tests.fixtures.base.LogCapture`, `setup: typing.Callable[..., tests.fixtures.base.LogCapture]` (the types are already spelled out in `src/tests/conftest.py:14,39`)
+- [x] Annotate parametrised arguments (`method`, `level`, `template`, `name`) and the `run_all` helper at `src/tests/test_selective.py:20`
+- [x] Run `ruff check && ruff format --check`
 
 **Acceptance Criteria:**
 
-- [ ] An AST walk over `src/tests/` reports zero signatures missing parameter or return annotations
-- [ ] `pytest -m "not slow"` and `pytest -m slow` both pass
+- [x] An AST walk over `src/tests/` reports zero signatures missing parameter or return annotations
+- [x] `pytest -m "not slow"` and `pytest -m slow` both pass
 
 **Notes:**
 
@@ -249,7 +253,7 @@ from `__all__`. No task needs further human input.
 
 ## Task 9: Consolidate sink registration in `setup_logger`
 
-**Status:** todo
+**Status:** done
 **Priority:** low
 **Complexity:** small
 **Source Reference:** Findings "duplicated sink format strings" (A15) and "unguarded sink registration in `setup_logger`" (A1)
@@ -258,17 +262,17 @@ from `__all__`. No task needs further human input.
 
 **Subtasks:**
 
-- [ ] Hoist the shared record format (`'{time:YYYY-MM-DDTHH:mm:ss!UTC} {level: <8} {file}:{line}/{function} {message}'`) to a module-level constant and derive the stderr variant (colour tags plus process/thread fields) from it
-- [ ] Collect the id returned by each `logger.add(...)` as it succeeds
-- [ ] Wrap the three registrations so that on `OSError` every already-registered id is passed to `logger.remove(id)` before the exception is re-raised
-- [ ] Make the rollback tolerant of a sink that is already gone, so a failure during cleanup cannot mask the original error
-- [ ] Add a test using an unwritable directory asserting that `setup_logger` raises and that no sinks remain registered afterwards
+- [x] Hoist the shared record format (`'{time:YYYY-MM-DDTHH:mm:ss!UTC} {level: <8} {file}:{line}/{function} {message}'`) to a module-level constant and derive the stderr variant (colour tags plus process/thread fields) from it
+- [x] Collect the id returned by each `logger.add(...)` as it succeeds
+- [x] Wrap the three registrations so that on `OSError` every already-registered id is passed to `logger.remove(id)` before the exception is re-raised
+- [x] Make the rollback tolerant of a sink that is already gone, so a failure during cleanup cannot mask the original error
+- [x] Add a test using an unwritable directory asserting that `setup_logger` raises and that no sinks remain registered afterwards
 
 **Acceptance Criteria:**
 
-- [ ] Adding a field to the shared format changes both the text and jsonl sinks
-- [ ] A mid-sequence `OSError` leaves zero sinks registered and re-raises the original exception
-- [ ] `pytest src/tests/test_sinks.py` passes (the format assertions there pin the current layout)
+- [x] Adding a field to the shared format changes both the text and jsonl sinks
+- [x] A mid-sequence `OSError` leaves zero sinks registered and re-raises the original exception
+- [x] `pytest src/tests/test_sinks.py` passes (the format assertions there pin the current layout)
 
 **Notes:**
 
@@ -282,7 +286,7 @@ from `__all__`. No task needs further human input.
 
 ## Task 10: Clear the remaining mechanical hits
 
-**Status:** todo
+**Status:** done
 **Priority:** low
 **Complexity:** small
 **Source Reference:** Mechanical rules `stdlib-logging`, `in-function-import`, `non-alphabetical-literal`, `legacy-formatting-format`; Finding "empty `tests/emitters/__init__.py`" (A17)
@@ -291,20 +295,21 @@ from `__all__`. No task needs further human input.
 
 **Subtasks:**
 
-- [ ] Hoist `import linecache` from `src/logit/base.py:58` into the module import block
-- [ ] Sort `src/logit/__init__.py:3` to `['StreamToLogger', 'jsonl_file', 'log_file', 'reset', 'setup_logger', 'showwarning']` (`log_dir` is removed by Task 11)
-- [ ] Add `# auditme: accept interceptor must import stdlib logging` above `src/logit/base.py:2`
-- [ ] Add `# auditme: accept emitter modules exist to be addressed by dotted name` to `src/tests/emitters/__init__.py`
-- [ ] Re-run `python3 ~/.claude/skills/auditme/checks/audit.py . --package logit` and confirm every remaining hit is `accepted: true`
+- [x] Hoist `import linecache` from `src/logit/base.py:58` into the module import block
+- [x] Sort `src/logit/__init__.py:3` to `['StreamToLogger', 'jsonl_file', 'log_file', 'reset', 'setup_logger', 'showwarning']` (`log_dir` is removed by Task 11)
+- [x] Add `# auditme: accept interceptor must import stdlib logging` above `src/logit/base.py:2`
+- [x] Add `# auditme: accept emitter modules exist to be addressed by dotted name` to `src/tests/emitters/__init__.py`
+- [x] Re-run `python3 ~/.claude/skills/auditme/checks/audit.py . --package logit` and confirm every remaining hit is `accepted: true`
 
 **Acceptance Criteria:**
 
-- [ ] The audit script reports zero `accepted: false` hits
-- [ ] `pytest -m "not slow"` passes
-- [ ] `ruff check` is clean
+- [x] The audit script reports zero `accepted: false` hits
+- [x] `pytest -m "not slow"` passes
+- [x] `ruff check` is clean
 
 **Notes:**
 
+- The worktree's inherited `PYTHONPATH` had a stale entry from an unrelated project (`ralpher/src`, which contains its own `tests` package with an `__init__.py`) ahead of nothing overriding it. Because `src/tests` here is an implicit namespace package (no `__init__.py`), Python's import resolution picked the regular `tests` package from the other project instead, breaking `import tests.fixtures.base`. Not a code defect - running with `unset PYTHONPATH` before `source bin/activate.sh` avoids it.
 - Depends on Tasks 2, 3, 4 and 11 - those remove the `legacy-formatting-format`, `silent-broad-except`, `leading-underscore-*` and (possibly) `non-alphabetical-literal` hits at source, so this task only mops up what is genuinely intentional
 - The script scans `src/logit/` only; the emitters marker is for Phase B, not the script
 - This is the convergence gate: review-2 on unchanged code should report the same finding set as review-1 minus everything fixed here
@@ -313,7 +318,7 @@ from `__all__`. No task needs further human input.
 
 ## Task 11: Drop `log_dir` from the public surface
 
-**Status:** todo
+**Status:** done
 **Priority:** low
 **Complexity:** small
 **Source Reference:** Finding "`log_dir` exported but unused" (A17)
@@ -322,16 +327,16 @@ from `__all__`. No task needs further human input.
 
 **Subtasks:**
 
-- [ ] Remove `log_dir` from `__all__` and from the re-export at `src/logit/__init__.py:1`
-- [ ] Keep `log_dir` in `src/logit/base.py:176` - `log_file` and `jsonl_file` still call it for their default
-- [ ] Confirm `log_file`/`jsonl_file` cover every external need (`src/tests/test_sinks.py:55-56` and `src/tests/fixtures/base.py:30,55` are the only consumers)
-- [ ] Grep `src/` and `bin/` for `logit.log_dir` to confirm nothing breaks
+- [x] Remove `log_dir` from `__all__` and from the re-export at `src/logit/__init__.py:1`
+- [x] Keep `log_dir` in `src/logit/base.py:176` - `log_file` and `jsonl_file` still call it for their default
+- [x] Confirm `log_file`/`jsonl_file` cover every external need (`src/tests/test_sinks.py:55-56` and `src/tests/fixtures/base.py:30,55` are the only consumers)
+- [x] Grep `src/` and `bin/` for `logit.log_dir` to confirm nothing breaks
 
 **Acceptance Criteria:**
 
-- [ ] Every symbol in `__all__` has at least one consumer outside `src/logit/`
-- [ ] `grep -rn "logit.log_dir\|log_dir" src bin` matches only `src/logit/base.py`
-- [ ] `pytest -m "not slow"` passes
+- [x] Every symbol in `__all__` has at least one consumer outside `src/logit/`
+- [x] `grep -rn "logit.log_dir\|log_dir" src bin` matches only `src/logit/base.py`
+- [x] `pytest -m "not slow"` passes
 
 **Notes:**
 
@@ -342,7 +347,7 @@ from `__all__`. No task needs further human input.
 
 ## Task 12: Cache parsed records in `LogCapture`
 
-**Status:** todo
+**Status:** done
 **Priority:** low
 **Complexity:** small
 **Source Reference:** Finding "`LogCapture` re-reads and re-parses the sink on every accessor" (A14 / P3)
@@ -351,26 +356,28 @@ from `__all__`. No task needs further human input.
 
 **Subtasks:**
 
-- [ ] Cache the parsed record list on the `LogCapture` instance, invalidated whenever `complete()` runs or new records may have been written
-- [ ] Make `find()` reuse the list it already loaded for its assertion message instead of calling `messages()` (which re-parses)
-- [ ] Verify the cache cannot mask records written between two assertions in the same test
+- [x] Cache the parsed record list on the `LogCapture` instance, invalidated whenever `complete()` runs or new records may have been written
+- [x] Make `find()` reuse the list it already loaded for its assertion message instead of calling `messages()` (which re-parses)
+- [x] Verify the cache cannot mask records written between two assertions in the same test
 
 **Acceptance Criteria:**
 
-- [ ] A test calling `find()` five times parses the file once
-- [ ] `pytest -m "not slow"` and `pytest -m slow` both pass unchanged
+- [x] A test calling `find()` five times parses the file once
+- [x] `pytest -m "not slow"` and `pytest -m slow` both pass unchanged
 
 **Notes:**
 
 - Key file: `src/tests/fixtures/base.py:24-51`
 - `src/tests/test_sinks.py:35-38` is the worst case: five `find()` calls, so five full parses
 - Correctness beats speed here - if a safe invalidation rule is not obvious, cache only within a single accessor call (fixing `find()`) and leave `records()` alone
+- Implemented as: `records()` still calls `complete()` unconditionally (so a background write in flight is always flushed to disk first), then compares the jsonl file's `(st_mtime_ns, st_size)` against the cached key and only re-parses if it changed. A blind "`complete()` clears the cache" rule was rejected because `records()` calls `complete()` on every invocation, which would invalidate the cache on every call and defeat the caching entirely. The stat-based key re-parses exactly when new bytes have actually landed on disk, so it satisfies both the five-calls-one-parse requirement and the no-masking requirement without them being in tension
+- Added `test_find_parses_the_sink_once_across_repeated_calls` (monkeypatches `json.loads` to count invocations) and `test_cache_does_not_mask_records_written_between_assertions` to `src/tests/test_sinks.py`
 
 ---
 
 ## Task 13: Fix dependency placement and add a property test
 
-**Status:** todo
+**Status:** done
 **Priority:** low
 **Complexity:** small
 **Source Reference:** Findings "`joblib` declared as a runtime dependency" (D2) and "no property-based tests" (T2)
@@ -379,27 +386,28 @@ from `__all__`. No task needs further human input.
 
 **Subtasks:**
 
-- [ ] `uv remove joblib && uv add --dev joblib` (only `src/tests/test_concurrency.py` and `bin/demo-logging.py` import it)
-- [ ] `uv add --dev hypothesis`
-- [ ] Add a property test in `src/tests/test_streams.py` over arbitrary text asserting the invariant: emitted messages equal `[line.rstrip() for line in buffer.rstrip().splitlines()]`
-- [ ] Give it `@settings(max_examples=20, deadline=10000)` as the testing standard requires
+- [x] `uv remove joblib && uv add --dev joblib` (only `src/tests/test_concurrency.py` and `bin/demo-logging.py` import it)
+- [x] `uv add --dev hypothesis`
+- [x] Add a property test in `src/tests/test_streams.py` over arbitrary text asserting the invariant: emitted messages equal `[line.rstrip() for line in buffer.rstrip().splitlines()]`
+- [x] Give it `@settings(max_examples=20, deadline=10000)` as the testing standard requires
 
 **Acceptance Criteria:**
 
-- [ ] `logit`'s runtime dependency list is `["loguru"]`
-- [ ] `pytest src/tests/test_streams.py` passes, including the property test
-- [ ] `uv.lock` is regenerated by `uv`, not hand-edited
+- [x] `logit`'s runtime dependency list is `["loguru"]`
+- [x] `pytest src/tests/test_streams.py` passes, including the property test
+- [x] `uv.lock` is regenerated by `uv`, not hand-edited
 
 **Notes:**
 
 - `bin/demo-logging.py` imports joblib, so the demo needs the dev group installed - note that in the README (Task 14)
 - The existing literal-based tests at `src/tests/test_streams.py:64-92` stay; the property test generalises them
+- Correction found during implementation: the property test uses the function-scoped `capture` fixture, but Hypothesis reruns the test body many times per fixture instance, so records from earlier examples stay in the sink. Compared the tail of `capture.messages()` (sliced from the count captured before each `write`) against the expected list instead of the whole list, and added `suppress_health_check=[hypothesis.HealthCheck.function_scoped_fixture]` to `@settings` since the fixture reuse is deliberate here, not a bug
 
 ---
 
 ## Task 14: Bring the documentation in line with the code
 
-**Status:** todo
+**Status:** done
 **Priority:** medium
 **Complexity:** medium
 **Source Reference:** Findings "README does not describe the project or its API" (Doc3) and "AGENTS.md structure and library gaps" (Doc1 / Doc2)
@@ -408,20 +416,20 @@ from `__all__`. No task needs further human input.
 
 **Subtasks:**
 
-- [ ] Settle one description and propagate it to `README.md:3`, `AGENTS.md:3` and `pyproject.toml:4` (currently "A test of using loguru for logging" / "A loguru wrapper" / "Testing loguru and logging")
-- [ ] Add a README usage section: install, `logit.setup_logger(directory=..., stderr=..., disabled=[...], subprocess=...)`, what each of the three sinks contains and where it lands, the `disabled` mechanism, `StreamToLogger` for `print()` capture, and `reset()`
-- [ ] Document the `subprocess=True` per-pid file mode and when to use it
-- [ ] Mention `bin/demo-logging.sh` and how to run it (including the dev-group dependency on joblib)
-- [ ] Add `src/logit/__init__.py` and `src/tests/conftest.py` to AGENTS.md's Module Structure list
-- [ ] Add a short "Tools and libraries" section to AGENTS.md naming loguru, joblib, pytest and uv
-- [ ] Keep to ASCII punctuation per the markdown rules
+- [x] Settle one description and propagate it to `README.md:3`, `AGENTS.md:3` and `pyproject.toml:4` (currently "A test of using loguru for logging" / "A loguru wrapper" / "Testing loguru and logging")
+- [x] Add a README usage section: install, `logit.setup_logger(directory=..., stderr=..., disabled=[...], subprocess=...)`, what each of the three sinks contains and where it lands, the `disabled` mechanism, `StreamToLogger` for `print()` capture, and `reset()`
+- [x] Document the `subprocess=True` per-pid file mode and when to use it
+- [x] Mention `bin/demo-logging.sh` and how to run it (including the dev-group dependency on joblib)
+- [x] Add `src/logit/__init__.py` and `src/tests/conftest.py` to AGENTS.md's Module Structure list
+- [x] Add a short "Tools and libraries" section to AGENTS.md naming loguru, joblib, pytest and uv
+- [x] Keep to ASCII punctuation per the markdown rules
 
 **Acceptance Criteria:**
 
-- [ ] All three description strings agree
-- [ ] Every symbol in `logit.__all__` appears in the README
-- [ ] AGENTS.md's Module Structure list matches `find src bin -name '*.py'`
-- [ ] `pre-commit run --all-files` passes
+- [x] All three description strings agree
+- [x] Every symbol in `logit.__all__` appears in the README
+- [x] AGENTS.md's Module Structure list matches `find src bin -name '*.py'`
+- [x] `pre-commit run --all-files` passes
 
 **Notes:**
 

@@ -3,12 +3,16 @@ import multiprocessing
 import os
 import pathlib
 import threading
+import typing
 
 import joblib
 import loguru
 import pytest
 
 import logit
+
+if typing.TYPE_CHECKING:
+    import tests.fixtures.base
 
 pytestmark = pytest.mark.slow
 
@@ -37,7 +41,7 @@ def emit(label: str) -> None:
         loguru.logger.info(f'{label} {index}')
 
 
-def test_threads_share_the_log_and_keep_distinct_thread_ids(capture):
+def test_threads_share_the_log_and_keep_distinct_thread_ids(capture: tests.fixtures.base.LogCapture) -> None:
     threads = [threading.Thread(target=emit, args=(f'thread-{n}',)) for n in range(3)]
     for thread in threads:
         thread.start()
@@ -55,7 +59,7 @@ def test_threads_share_the_log_and_keep_distinct_thread_ids(capture):
     assert {r['process']['id'] for r in records} == {os.getpid()}
 
 
-def test_threaded_records_are_not_interleaved_mid_line(capture):
+def test_threaded_records_are_not_interleaved_mid_line(capture: tests.fixtures.base.LogCapture) -> None:
     """enqueue=True serialises writes, so no line may be torn."""
     threads = [threading.Thread(target=emit, args=(f'thread-{n}',)) for n in range(4)]
     for thread in threads:
@@ -69,7 +73,7 @@ def test_threaded_records_are_not_interleaved_mid_line(capture):
         assert line.count('thread-') == 1
 
 
-def test_multiprocessing_children_write_their_own_files(capture):
+def test_multiprocessing_children_write_their_own_files(capture: tests.fixtures.base.LogCapture) -> None:
     processes = [multiprocessing.Process(target=child_entrypoint, args=(str(capture.directory), f'proc-{n}')) for n in range(2)]
     for process in processes:
         process.start()
@@ -88,7 +92,7 @@ def test_multiprocessing_children_write_their_own_files(capture):
     assert labels == {'proc-0', 'proc-1'}
 
 
-def test_joblib_workers_write_their_own_files(capture):
+def test_joblib_workers_write_their_own_files(capture: tests.fixtures.base.LogCapture) -> None:
     joblib.Parallel(n_jobs=2)(joblib.delayed(child_entrypoint)(str(capture.directory), f'job-{n}') for n in range(2))
 
     by_pid = child_records(capture.directory)
@@ -99,7 +103,7 @@ def test_joblib_workers_write_their_own_files(capture):
         assert {r['process']['id'] for r in records} == {pid}
 
 
-def test_child_logs_do_not_land_in_the_parent_log(capture):
+def test_child_logs_do_not_land_in_the_parent_log(capture: tests.fixtures.base.LogCapture) -> None:
     loguru.logger.info('parent only')
     process = multiprocessing.Process(target=child_entrypoint, args=(str(capture.directory), 'child'))
     process.start()
