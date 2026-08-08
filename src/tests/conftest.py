@@ -36,6 +36,8 @@ def make_capture(
     level: str = logit.base.DEFAULT_LEVEL,
     stderr_level: str | None = None,
     diagnose: bool = False,
+    rotation: logit.base.RotationSpec = None,
+    retention: logit.base.RetentionSpec = None,
 ) -> tests.fixtures.base.LogCapture:
     logit.setup_logger(
         directory=directory,
@@ -45,6 +47,8 @@ def make_capture(
         level=level,
         stderr_level=stderr_level,
         diagnose=diagnose,
+        rotation=rotation,
+        retention=retention,
     )
     return tests.fixtures.base.LogCapture(directory, stderr, subprocess=subprocess)
 
@@ -61,6 +65,8 @@ def setup(tmp_path: pathlib.Path) -> typing.Generator[typing.Callable[..., tests
         level: str = logit.base.DEFAULT_LEVEL,
         stderr_level: str | None = None,
         diagnose: bool = False,
+        rotation: logit.base.RotationSpec = None,
+        retention: logit.base.RetentionSpec = None,
     ) -> tests.fixtures.base.LogCapture:
         return make_capture(
             tmp_path,
@@ -70,6 +76,8 @@ def setup(tmp_path: pathlib.Path) -> typing.Generator[typing.Callable[..., tests
             level=level,
             stderr_level=stderr_level,
             diagnose=diagnose,
+            rotation=rotation,
+            retention=retention,
         )
 
     yield build

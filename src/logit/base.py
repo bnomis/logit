@@ -1,4 +1,5 @@
 import contextlib
+import datetime
 import inspect
 import linecache
 
@@ -17,6 +18,11 @@ import loguru
 showwarning_ = warnings.showwarning
 
 DEFAULT_LEVEL = 'DEBUG'
+
+# loguru accepts several spellings for each of these; mirroring its own
+# accepted types keeps the wrapper from narrowing what callers can pass.
+type RotationSpec = str | int | datetime.time | datetime.timedelta | typing.Callable[..., typing.Any] | None
+type RetentionSpec = str | int | datetime.timedelta | typing.Callable[..., typing.Any] | None
 
 RECORD_FORMAT = '{time:YYYY-MM-DDTHH:mm:ss!UTC} {level: <8} {file}:{line}/{function} {message}'
 STDERR_FORMAT = RECORD_FORMAT.replace('{level: <8}', '<level>{level: <8}</level>').replace('{file}', '{process.id} {thread.id} {file}')
@@ -245,6 +251,8 @@ def setup_logger(
     level: str = DEFAULT_LEVEL,
     stderr_level: str | None = None,
     diagnose: bool = False,
+    rotation: RotationSpec = None,
+    retention: RetentionSpec = None,
 ) -> None:
     """Install the stderr, log file and jsonl sinks.
 
@@ -261,6 +269,17 @@ def setup_logger(
         diagnose: Whether loguru annotates traceback lines with the values of
             the expressions on them. Off by default: those values include
             request parameters and API keys, and the file sinks persist them.
+        rotation: When to close the current file sink and start a new one -
+            a size ('10 MB'), an interval ('1 week'), a time of day, or a
+            callable, per loguru. Applies to both file sinks; the terminal
+            sink has no file to roll. None (the default) never rotates,
+            which is what a consumer that manages its own log lifetime
+            wants; a consumer keeping an unbounded audit trail should set
+            it, because nothing else here caps growth.
+        retention: How long rotated files are kept - a count (5), an age
+            ('30 days'), or a callable, per loguru. None (the default)
+            keeps them forever. Only meaningful alongside `rotation`:
+            without it there is never more than one file per sink to expire.
     """
     if stderr_level is None:
         stderr_level = level
@@ -294,6 +313,8 @@ def setup_logger(
                 level=level,
                 diagnose=diagnose,
                 enqueue=True,
+                rotation=rotation,
+                retention=retention,
             )
         )
         # log to jsonl
@@ -305,6 +326,8 @@ def setup_logger(
                 diagnose=diagnose,
                 serialize=True,
                 enqueue=True,
+                rotation=rotation,
+                retention=retention,
             )
         )
     except OSError:
