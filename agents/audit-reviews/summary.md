@@ -102,3 +102,11 @@
 ## Script coverage backlog
 
 - (empty)
+
+## Checker changes since review-1
+
+- **`translator-envelope-gap`** (2026-08-16) - a function whose only error
+  envelope is a translating decorator or a `with` block over a translating
+  contextmanager, where that envelope's except tuple omits a branch of A2's
+  locked set the body triggers. Shipped from the skill's `requests.md`.
+  Catch-up surface here: **zero**.
