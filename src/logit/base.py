@@ -30,6 +30,7 @@ STDERR_FORMAT = RECORD_FORMAT.replace('{level: <8}', '<level>{level: <8}</level>
 
 # loguru's disable() is global and outlives logger.remove(), so track what we
 # disabled in order to undo it in reset()
+# auditme: accept[mutable-module-level-exported] the module's own record of what it disabled, appended and drained by setup_logger and reset; the one outside read is a test checking it does not grow
 disabled_ = []
 
 # dictConfig only touches loggers named in its 'loggers' key, so a logger

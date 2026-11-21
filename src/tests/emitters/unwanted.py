@@ -1,4 +1,4 @@
-import logging
+import logging  # auditme: accept[stdlib-logging] emitter logs through stdlib logging to exercise the interceptor
 import sys
 import warnings
 

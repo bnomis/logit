@@ -81,7 +81,7 @@ pre-commit hooks are ruff, ruff-format and shellcheck; none runs at pre-push.
 
 ## Task 3: Accept the stdlib-logging and disabled_ hits with scoped markers
 
-**Status:** todo
+**Status:** done
 **Priority:** low
 **Complexity:** small
 **Source Reference:** review-2 mechanical findings M-stdlib, M-mutable; Phase B A20 row at `src/logit/base.py:32`
@@ -90,17 +90,17 @@ pre-commit hooks are ruff, ruff-format and shellcheck; none runs at pre-push.
 
 **Subtasks:**
 
-- [ ] Add an inline `# auditme: accept[stdlib-logging] <reason>` on the `import logging` line of `src/tests/emitters/some_lib.py`, `unwanted.py`, `wanted.py` (reason: the emitter logs through stdlib logging to exercise the interceptor), `src/tests/test_intercept.py` (drives stdlib logging) and the fixture module that now imports it after Task 1 (saves and restores stdlib logging state). Inline, so no emitter line moves
-- [ ] Add `# auditme: accept[mutable-module-level-exported] <reason>` on the line above `disabled_ = []` in `src/logit/base.py` (reason: the module's own record of what it disabled, appended and drained by setup_logger and reset; the one outside read is a test checking it does not grow)
+- [x] Add an inline `# auditme: accept[stdlib-logging] <reason>` on the `import logging` line of `src/tests/emitters/some_lib.py`, `unwanted.py`, `wanted.py` (reason: the emitter logs through stdlib logging to exercise the interceptor), `src/tests/test_intercept.py` (drives stdlib logging) and the fixture module that now imports it after Task 1 (saves and restores stdlib logging state). Inline, so no emitter line moves
+- [x] Add `# auditme: accept[mutable-module-level-exported] <reason>` on the line above `disabled_ = []` in `src/logit/base.py` (reason: the module's own record of what it disabled, appended and drained by setup_logger and reset; the one outside read is a test checking it does not grow)
 
 **Acceptance Criteria:**
 
-- [ ] `python3 ~/.claude/skills/auditme/checks/audit.py .` reports every `stdlib-logging` and `mutable-module-level-exported` hit as accepted
+- [x] `python3 ~/.claude/skills/auditme/checks/audit.py .` reports every `stdlib-logging` and `mutable-module-level-exported` hit as accepted
 
 **Definition of Done:**
 
-- [ ] The task's commit passes its pre-commit hooks (never `--no-verify`)
-- [ ] `pytest src/tests/test_selective.py src/tests/test_intercept.py -m "not slow"` passes
+- [x] The task's commit passes its pre-commit hooks (never `--no-verify`)
+- [x] `pytest src/tests/test_selective.py src/tests/test_intercept.py -m "not slow"` passes
 
 **Notes:**
 

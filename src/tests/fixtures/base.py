@@ -1,7 +1,7 @@
 import contextlib
 import io
 import json
-import logging
+import logging  # auditme: accept[stdlib-logging] saves and restores stdlib logging state
 import sys
 import typing
 
