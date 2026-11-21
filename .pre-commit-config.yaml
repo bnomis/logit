@@ -12,3 +12,12 @@ repos:
     rev: v0.11.0.1
     hooks:
       - id: shellcheck
+
+  # The shared audit hooks, pinned to one commit of the checker.
+  # Upgrade with: pre-commit autoupdate --repo git@github.com:bnomis/auditor.git
+  - repo: git@github.com:bnomis/auditor.git
+    rev: 52b4813c56fdb74f52f86b1e2f3ea46bee2cfae1
+    hooks:
+      - id: auditme-changed
+      - id: auditme-all
+        stages: [manual, pre-push]
