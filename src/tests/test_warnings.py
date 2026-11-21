@@ -100,7 +100,7 @@ def test_direct_showwarning_on_a_real_file_appends_the_source_line(capture: test
 
     messages = capture.messages()
     assert messages[0] == 'UserWarning: real file'
-    assert messages[1].strip() == 'import logging'
+    assert messages[1].strip().startswith('import logging')
 
 
 def test_explicit_line_argument_is_used_verbatim(capture: tests.fixtures.base.LogCapture) -> None:

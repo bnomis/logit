@@ -17,13 +17,13 @@ plus `pytest` and `hypothesis` for the test suite.
 import logit
 
 logit.setup_logger(
-    directory=None,       # defaults to <package>/../../log
-    stderr=None,          # defaults to sys.__stderr__
-    disabled=[],          # dotted module names to silence
-    subprocess=False,     # per-pid file names instead of shared ones
-    level='DEBUG',        # minimum level emitted by the file sinks
-    stderr_level=None,    # terminal level; defaults to `level`
-    diagnose=False,       # render frame values in tracebacks
+    directory=None,  # defaults to <package>/../../log
+    stderr=None,  # defaults to sys.__stderr__
+    disabled=[],  # dotted module names to silence
+    subprocess=False,  # per-pid file names instead of shared ones
+    level='DEBUG',  # minimum level emitted by the file sinks
+    stderr_level=None,  # terminal level; defaults to `level`
+    diagnose=False,  # render frame values in tracebacks
 )
 ```
 

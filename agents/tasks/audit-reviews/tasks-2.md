@@ -110,7 +110,7 @@ pre-commit hooks are ruff, ruff-format and shellcheck; none runs at pre-push.
 
 ## Task 4: Move the ruff hook to the version the audit runs
 
-**Status:** todo
+**Status:** done
 **Priority:** low
 **Complexity:** small
 **Source Reference:** review-2 mechanical finding M-ruff
@@ -119,17 +119,17 @@ pre-commit hooks are ruff, ruff-format and shellcheck; none runs at pre-push.
 
 **Subtasks:**
 
-- [ ] Set the `ruff-pre-commit` `rev` in `.pre-commit-config.yaml` to `v0.17.6`
-- [ ] Run `pre-commit run --all-files`; commit any reformat or lint fix it makes as its own commit (`style: reformat with ruff 0.17.6`), separate from the rev change
+- [x] Set the `ruff-pre-commit` `rev` in `.pre-commit-config.yaml` to `v0.17.6`
+- [x] Run `pre-commit run --all-files`; commit any reformat or lint fix it makes as its own commit (`style: reformat with ruff 0.17.6`), separate from the rev change
 
 **Acceptance Criteria:**
 
-- [ ] `python3 ~/.claude/skills/auditme/checks/audit.py .` reports no `ruff-version-drift` hit
+- [x] `python3 ~/.claude/skills/auditme/checks/audit.py .` reports no `ruff-version-drift` hit
 
 **Definition of Done:**
 
-- [ ] The task's commits pass their pre-commit hooks (never `--no-verify`)
-- [ ] If the reformat touched Python files, `pytest -m "not slow" src/tests` passes
+- [x] The task's commits pass their pre-commit hooks (never `--no-verify`)
+- [x] If the reformat touched Python files, `pytest -m "not slow" src/tests` passes
 
 **Notes:**
 
