@@ -127,3 +127,30 @@ def test_failed_sink_registration_leaves_no_sinks_registered(tmp_path: pathlib.P
     finally:
         unwritable.chmod(0o700)
         logit.reset()
+
+
+def test_failed_rollback_still_raises_the_original_registration_error(tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """An OSError while removing a sink must not replace the registration error."""
+    if hasattr(os, 'geteuid') and os.geteuid() == 0:
+        pytest.skip('running as root, permissions are not enforced')
+
+    unwritable = tmp_path / 'unwritable'
+    unwritable.mkdir()
+    unwritable.chmod(0o500)
+    real_remove = loguru.logger.remove
+
+    def failing_remove(sink_id: int | None = None) -> None:
+        if sink_id is not None:
+            raise OSError('rollback failed')
+        real_remove()
+
+    monkeypatch.setattr(loguru.logger, 'remove', failing_remove)
+
+    try:
+        with pytest.raises(OSError) as excinfo:
+            logit.setup_logger(directory=unwritable, stderr=io.StringIO())
+        assert 'rollback failed' not in str(excinfo.value)
+    finally:
+        unwritable.chmod(0o700)
+        monkeypatch.undo()
+        logit.reset()

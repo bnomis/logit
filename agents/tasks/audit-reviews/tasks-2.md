@@ -139,7 +139,7 @@ pre-commit hooks are ruff, ruff-format and shellcheck; none runs at pre-push.
 
 ## Task 5: Small fixes in base.py
 
-**Status:** todo
+**Status:** done
 **Priority:** medium
 **Complexity:** small
 **Source Reference:** review-2 findings P1, P2, P3, P12, P13, P14
@@ -148,24 +148,24 @@ pre-commit hooks are ruff, ruff-format and shellcheck; none runs at pre-push.
 
 **Subtasks:**
 
-- [ ] P1: `except (OSError, UnicodeDecodeError):` around `linecache.getline`
-- [ ] P2: `contextlib.suppress(ValueError, OSError)` around `loguru.logger.remove(sink_id)` in the rollback
-- [ ] P2: add a test to `src/tests/test_sinks.py`, beside `test_failed_sink_registration_leaves_no_sinks_registered`, where removing a sink during rollback raises `OSError` and `setup_logger` still raises the original sink-registration `OSError`
-- [ ] P3: decorate `internal_files` with `functools.cache`
-- [ ] P12: rename `showwarning_` to `ORIGINAL_SHOWWARNING` and update `reset()`
-- [ ] P13: move `import datetime` under `if typing.TYPE_CHECKING:`
-- [ ] P14: delete the commented-out `showwarning_orig` block, the commented-out lines after `showwarning`'s last call and in `setup_logger` (`# dont need to take over stdout`, `# logger.add(sys.__stdout__)`), and the comments that restate the next line (`# remove all handlers`, `# log to file`, `# log to jsonl`)
+- [x] P1: `except (OSError, UnicodeDecodeError):` around `linecache.getline`
+- [x] P2: `contextlib.suppress(ValueError, OSError)` around `loguru.logger.remove(sink_id)` in the rollback
+- [x] P2: add a test to `src/tests/test_sinks.py`, beside `test_failed_sink_registration_leaves_no_sinks_registered`, where removing a sink during rollback raises `OSError` and `setup_logger` still raises the original sink-registration `OSError`
+- [x] P3: decorate `internal_files` with `functools.cache`
+- [x] P12: rename `showwarning_` to `ORIGINAL_SHOWWARNING` and update `reset()`
+- [x] P13: move `import datetime` under `if typing.TYPE_CHECKING:`
+- [x] P14: delete the commented-out `showwarning_orig` block, the commented-out lines after `showwarning`'s last call and in `setup_logger` (`# dont need to take over stdout`, `# logger.add(sys.__stdout__)`), and the comments that restate the next line (`# remove all handlers`, `# log to file`, `# log to jsonl`)
 
 **Acceptance Criteria:**
 
-- [ ] No commented-out code remains in `src/logit/base.py`
-- [ ] The new rollback test fails if `OSError` is removed from the `suppress`
-- [ ] `grep -rn showwarning_ src bin` finds nothing
+- [x] No commented-out code remains in `src/logit/base.py`
+- [x] The new rollback test fails if `OSError` is removed from the `suppress`
+- [x] `grep -rn showwarning_ src bin` finds nothing
 
 **Definition of Done:**
 
-- [ ] The task's commit passes its pre-commit hooks (never `--no-verify`)
-- [ ] `pytest src/tests/test_sinks.py src/tests/test_warnings.py src/tests/test_rotation.py -m "not slow"` passes
+- [x] The task's commit passes its pre-commit hooks (never `--no-verify`)
+- [x] `pytest src/tests/test_sinks.py src/tests/test_warnings.py src/tests/test_rotation.py -m "not slow"` passes
 
 **Notes:**
 

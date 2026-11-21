@@ -1,6 +1,6 @@
 import collections.abc
 import contextlib
-import datetime
+import functools
 import inspect
 import linecache
 
@@ -16,7 +16,10 @@ import warnings
 
 import loguru
 
-showwarning_ = warnings.showwarning
+if typing.TYPE_CHECKING:
+    import datetime
+
+ORIGINAL_SHOWWARNING = warnings.showwarning
 
 DEFAULT_LEVEL = 'DEBUG'
 
@@ -39,18 +42,7 @@ disabled_ = []
 disabled_logging_ = []
 
 
-# def showwarning_orig(message, *args, **kwargs):
-#     # Find caller from where originated the logged message.
-#     frame, depth = inspect.currentframe(), 0
-#     while frame and (depth == 0 or frame.f_code.co_filename == logging.__file__):
-#         frame = frame.f_back
-#         depth += 1
-
-#     logger.opt(depth=depth).warning(message)
-#     # logger.warning(message)
-#     showwarning_(message, *args, **kwargs)
-
-
+@functools.cache
 def internal_files() -> set[str]:
     """Files whose frames sit between the warning site and this hook.
 
@@ -85,7 +77,7 @@ def showwarning(
     if line is None and filename != 'sys':
         try:
             line = linecache.getline(filename, lineno)
-        except OSError:
+        except OSError, UnicodeDecodeError:
             loguru.logger.debug(f'could not read source line from {filename}')
             line = None
 
@@ -95,8 +87,6 @@ def showwarning(
     loguru.logger.opt(depth=depth).warning(msg)
     if line:
         loguru.logger.opt(depth=depth).warning(f'  {line}')
-    # logger.warning(message)
-    # showwarning_(message, category, filename, lineno, file=file, line=line)
 
 
 class InterceptHandler(logging.Handler):
@@ -239,7 +229,7 @@ def reset() -> None:
     loguru.logger.remove()
     re_enable_disabled()
     reset_disabled_logging()
-    warnings.showwarning = showwarning_
+    warnings.showwarning = ORIGINAL_SHOWWARNING
     warnings.resetwarnings()
     logging.captureWarnings(False)
     logging.config.dictConfig({'version': 1, 'disable_existing_loggers': False, 'root': {'handlers': []}})
@@ -286,7 +276,6 @@ def setup_logger(
     if stderr_level is None:
         stderr_level = level
 
-    # remove all handlers
     loguru.logger.remove()
     re_enable_disabled()
 
@@ -295,8 +284,6 @@ def setup_logger(
 
     sink_ids = []
     try:
-        # dont need to take over stdout
-        # logger.add(sys.__stdout__)
         # terminal/stderr
         sink_ids.append(
             loguru.logger.add(
@@ -307,7 +294,6 @@ def setup_logger(
                 enqueue=True,
             )
         )  # type: ignore
-        # log to file
         sink_ids.append(
             loguru.logger.add(
                 log_file(directory=directory, subprocess=subprocess),
@@ -319,7 +305,6 @@ def setup_logger(
                 retention=retention,
             )
         )
-        # log to jsonl
         sink_ids.append(
             loguru.logger.add(
                 jsonl_file(directory=directory, subprocess=subprocess),
@@ -334,7 +319,7 @@ def setup_logger(
         )
     except OSError:
         for sink_id in sink_ids:
-            with contextlib.suppress(ValueError):
+            with contextlib.suppress(ValueError, OSError):
                 loguru.logger.remove(sink_id)
         raise
 
