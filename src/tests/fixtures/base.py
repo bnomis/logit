@@ -1,13 +1,17 @@
 import contextlib
+import io
 import json
+import logging
+import sys
 import typing
 
 import loguru
+import pytest
 
 import logit
+import logit.base
 
 if typing.TYPE_CHECKING:
-    import io
     import pathlib
 
 
@@ -86,3 +90,76 @@ class LogCapture:
         err = logit.StreamToLogger(level='ERROR')
         with contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):  # type: ignore
             yield
+
+
+@pytest.fixture
+def capture(tmp_path: pathlib.Path) -> typing.Generator[LogCapture]:
+    """Configure logit into a temp dir and hand back a reader for its sinks.
+
+    loguru, stdlib logging and warnings are all process-global, so teardown has
+    to be thorough or state leaks between tests.
+    """
+    stdout_, stderr_ = sys.stdout, sys.stderr
+    handlers_ = logging.root.handlers[:]
+    yield make_capture(tmp_path, io.StringIO())
+    logit.reset()
+    sys.stdout, sys.stderr = stdout_, stderr_
+    logging.root.handlers[:] = handlers_
+
+
+def make_capture(
+    directory: pathlib.Path,
+    stderr: io.StringIO,
+    disabled: list[str] | None = None,
+    subprocess: bool = False,
+    level: str = logit.base.DEFAULT_LEVEL,
+    stderr_level: str | None = None,
+    diagnose: bool = False,
+    rotation: logit.base.RotationSpec = None,
+    retention: logit.base.RetentionSpec = None,
+) -> LogCapture:
+    logit.setup_logger(
+        directory=directory,
+        stderr=stderr,
+        disabled=disabled,
+        subprocess=subprocess,
+        level=level,
+        stderr_level=stderr_level,
+        diagnose=diagnose,
+        rotation=rotation,
+        retention=retention,
+    )
+    return LogCapture(directory, stderr, subprocess=subprocess)
+
+
+@pytest.fixture
+def setup(tmp_path: pathlib.Path) -> typing.Generator[typing.Callable[..., LogCapture]]:
+    """Like `capture`, but lets a test choose `disabled` / `subprocess` itself."""
+    stdout_, stderr_ = sys.stdout, sys.stderr
+    handlers_ = logging.root.handlers[:]
+
+    def build(
+        disabled: list[str] | None = None,
+        subprocess: bool = False,
+        level: str = logit.base.DEFAULT_LEVEL,
+        stderr_level: str | None = None,
+        diagnose: bool = False,
+        rotation: logit.base.RotationSpec = None,
+        retention: logit.base.RetentionSpec = None,
+    ) -> LogCapture:
+        return make_capture(
+            tmp_path,
+            io.StringIO(),
+            disabled=disabled,
+            subprocess=subprocess,
+            level=level,
+            stderr_level=stderr_level,
+            diagnose=diagnose,
+            rotation=rotation,
+            retention=retention,
+        )
+
+    yield build
+    logit.reset()
+    sys.stdout, sys.stderr = stdout_, stderr_
+    logging.root.handlers[:] = handlers_

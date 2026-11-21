@@ -16,7 +16,7 @@ pre-commit hooks are ruff, ruff-format and shellcheck; none runs at pre-push.
 
 ## Task 1: Move the test fixtures out of conftest.py
 
-**Status:** todo
+**Status:** done
 **Priority:** medium
 **Complexity:** small
 **Source Reference:** review-2 decision D3 (finding P15)
@@ -25,19 +25,19 @@ pre-commit hooks are ruff, ruff-format and shellcheck; none runs at pre-push.
 
 **Subtasks:**
 
-- [ ] Move `capture`, `make_capture` and `setup` from `src/tests/conftest.py` into `src/tests/fixtures/base.py`, with the imports they need (`io`, `logging`, `sys`, `pytest`, `logit.base`)
-- [ ] Reduce `src/tests/conftest.py` to loading them: `pytest_plugins = ['tests.fixtures.base']`. If pytest refuses `pytest_plugins` there, import the two fixtures by full path instead and say so in the commit body
-- [ ] Update the `conftest.py` and `fixtures/base.py` lines in AGENTS.md's Module Structure list
+- [x] Move `capture`, `make_capture` and `setup` from `src/tests/conftest.py` into `src/tests/fixtures/base.py`, with the imports they need (`io`, `logging`, `sys`, `pytest`, `logit.base`)
+- [x] Reduce `src/tests/conftest.py` to loading them: `pytest_plugins = ['tests.fixtures.base']`. If pytest refuses `pytest_plugins` there, import the two fixtures by full path instead and say so in the commit body
+- [x] Update the `conftest.py` and `fixtures/base.py` lines in AGENTS.md's Module Structure list
 
 **Acceptance Criteria:**
 
-- [ ] `src/tests/conftest.py` defines no fixture or helper function
-- [ ] Every test that uses `capture` or `setup` still finds it
+- [x] `src/tests/conftest.py` defines no fixture or helper function
+- [x] Every test that uses `capture` or `setup` still finds it
 
 **Definition of Done:**
 
-- [ ] The task's commit passes its pre-commit hooks (never `--no-verify`)
-- [ ] `pytest -m "not slow" src/tests` passes (every test module uses one of the moved fixtures)
+- [x] The task's commit passes its pre-commit hooks (never `--no-verify`)
+- [x] `pytest -m "not slow" src/tests` passes (every test module uses one of the moved fixtures)
 
 **Notes:**
 

@@ -40,9 +40,9 @@ The core logging architecture is in [src/logit/base.py](src/logit/base.py):
 - [src/logit/**init**.py](src/logit/__init__.py): public API re-exports (`__all__`)
 - [src/logit/base.py](src/logit/base.py): Core logging setup and configuration
 - [bin/demo-logging.py](bin/demo-logging.py): visual demo of every capture path, run via [bin/demo-logging.sh](bin/demo-logging.sh)
-- [src/tests/conftest.py](src/tests/conftest.py): `capture` and `setup` fixtures shared across the test suite
+- [src/tests/conftest.py](src/tests/conftest.py): loads the fixtures plugin (`pytest_plugins`); defines no fixture itself
 - [src/tests/emitters/](src/tests/emitters): modules that emit on every capture path, used as test subjects
-- [src/tests/fixtures/base.py](src/tests/fixtures/base.py): `LogCapture`, which reads the sinks back for assertions
+- [src/tests/fixtures/base.py](src/tests/fixtures/base.py): `LogCapture`, which reads the sinks back for assertions, and the `capture` and `setup` fixtures shared across the test suite
 
 ### Tests
 
