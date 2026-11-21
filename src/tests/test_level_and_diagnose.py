@@ -11,7 +11,7 @@ if typing.TYPE_CHECKING:
     import tests.fixtures.base
 
 
-ALL_MESSAGES = ['a debug', 'an info', 'a warning']
+ALL_MESSAGES = ['a debug', 'a warning', 'an info']
 
 
 def log_the_failure() -> None:
@@ -62,7 +62,7 @@ def test_diagnose_can_be_turned_on(setup: collections.abc.Callable[..., tests.fi
     ('level', 'emitted', 'dropped'),
     [
         ('DEBUG', ALL_MESSAGES, []),
-        ('INFO', ['an info', 'a warning'], ['a debug']),
+        ('INFO', ['a warning', 'an info'], ['a debug']),
         ('WARNING', ['a warning'], ['a debug', 'an info']),
         ('ERROR', [], ALL_MESSAGES),
     ],

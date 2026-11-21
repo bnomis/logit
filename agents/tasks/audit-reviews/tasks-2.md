@@ -243,7 +243,7 @@ pre-commit hooks are ruff, ruff-format and shellcheck; none runs at pre-push.
 
 ## Task 8: Whole-tree checks before merge
 
-**Status:** todo
+**Status:** done
 **Priority:** medium
 **Complexity:** small
 **Source Reference:** review-2 (all items)
@@ -252,20 +252,20 @@ pre-commit hooks are ruff, ruff-format and shellcheck; none runs at pre-push.
 
 **Subtasks:**
 
-- [ ] Run `pre-commit run --all-files`
-- [ ] Run `python3 ~/.claude/skills/auditme/checks/audit.py . > /tmp/audit-logit.jsonl` and check every hit is accepted
-- [ ] Run the tests below
-- [ ] In `agents/audit-reviews/summary.md`, move review-2's findings from Unresolved to Recently resolved
+- [x] Run `pre-commit run --all-files`
+- [x] Run `python3 ~/.claude/skills/auditme/checks/audit.py . > /tmp/audit-logit.jsonl` and check every hit is accepted
+- [x] Run the tests below
+- [x] In `agents/audit-reviews/summary.md`, move review-2's findings from Unresolved to Recently resolved
 
 **Acceptance Criteria:**
 
-- [ ] The sweep reports zero unaccepted hits
+- [x] The sweep reports zero unaccepted hits
 
 **Definition of Done:**
 
-- [ ] `pre-commit run --all-files` exits 0
-- [ ] `pytest -m "not slow" src/tests` passes (every test module imports `logit`, which this list changed)
-- [ ] `pytest -m slow src/tests/test_concurrency.py` passes (it drives `StreamToLogger` and `setup_logger` across processes)
+- [x] `pre-commit run --all-files` exits 0
+- [x] `pytest -m "not slow" src/tests` passes (every test module imports `logit`, which this list changed)
+- [x] `pytest -m slow src/tests/test_concurrency.py` passes (it drives `StreamToLogger` and `setup_logger` across processes)
 
 **Notes:**
 
