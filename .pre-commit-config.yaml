@@ -16,7 +16,7 @@ repos:
   # The shared audit hooks, pinned to one commit of the checker.
   # Upgrade with: pre-commit autoupdate --repo git@github.com:bnomis/auditor.git
   - repo: git@github.com:bnomis/auditor.git
-    rev: 52b4813c56fdb74f52f86b1e2f3ea46bee2cfae1
+    rev: 717d4af03e5d50448406cf828e6616442705eb64
     hooks:
       - id: auditme-changed
       - id: auditme-all
