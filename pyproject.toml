@@ -7,11 +7,7 @@ requires-python = ">=3.14"
 dependencies = ["loguru>=0.7.3"]
 
 [dependency-groups]
-dev = [
-    "hypothesis>=6.158.1",
-    "joblib>=1.5.3",
-    "pytest>=9.1.1",
-]
+dev = ["hypothesis>=6.158.1", "joblib>=1.5.3", "pytest>=9.1.1", "ruff==0.17.4"]
 
 
 [tool.pytest.ini_options]
