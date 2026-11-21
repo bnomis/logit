@@ -11,6 +11,13 @@ This is a project exploring loguru for logging in Python. The project demonstrat
 - Selectively enable/disable logging from specific modules
 - Configure multiple log outputs (stderr, file, and JSONL)
 
+## No project names
+
+logit is used by many projects. Its code, tests, fixtures, specs, task lists,
+records and commit messages name no project that uses it: one that found
+something is "one project". The `no-project-names` hook, from the auditor
+repository, enforces it on every commit and commit message.
+
 ## Code Architecture
 
 ### Logging System Design

@@ -21,3 +21,6 @@ repos:
       - id: auditme-changed
       - id: auditme-all
         stages: [manual, pre-push]
+      # logit is used by many projects, so nothing here names one (AGENTS.md).
+      - id: no-project-names
+        args: [--allow=logit]

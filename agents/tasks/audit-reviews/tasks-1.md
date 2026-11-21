@@ -309,7 +309,7 @@ from `__all__`. No task needs further human input.
 
 **Notes:**
 
-- The worktree's inherited `PYTHONPATH` had a stale entry from an unrelated project (`ralpher/src`, which contains its own `tests` package with an `__init__.py`) ahead of nothing overriding it. Because `src/tests` here is an implicit namespace package (no `__init__.py`), Python's import resolution picked the regular `tests` package from the other project instead, breaking `import tests.fixtures.base`. Not a code defect - running with `unset PYTHONPATH` before `source bin/activate.sh` avoids it.
+- The worktree's inherited `PYTHONPATH` had a stale entry from an unrelated project (its `src`, which contains its own `tests` package with an `__init__.py`) ahead of nothing overriding it. Because `src/tests` here is an implicit namespace package (no `__init__.py`), Python's import resolution picked the regular `tests` package from the other project instead, breaking `import tests.fixtures.base`. Not a code defect - running with `unset PYTHONPATH` before `source bin/activate.sh` avoids it.
 - Depends on Tasks 2, 3, 4 and 11 - those remove the `legacy-formatting-format`, `silent-broad-except`, `leading-underscore-*` and (possibly) `non-alphabetical-literal` hits at source, so this task only mops up what is genuinely intentional
 - The script scans `src/logit/` only; the emitters marker is for Phase B, not the script
 - This is the convergence gate: review-2 on unchanged code should report the same finding set as review-1 minus everything fixed here
