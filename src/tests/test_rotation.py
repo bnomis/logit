@@ -3,6 +3,7 @@ import typing
 import loguru
 
 if typing.TYPE_CHECKING:
+    import collections.abc
     import pathlib
 
     import tests.fixtures.base
@@ -31,7 +32,7 @@ def test_no_rotation_by_default_leaves_one_file_per_sink(capture: tests.fixtures
     assert len(rolled(capture.directory, '.jsonl')) == 1
 
 
-def test_rotation_rolls_both_file_sinks(setup: typing.Callable[..., tests.fixtures.base.LogCapture]) -> None:
+def test_rotation_rolls_both_file_sinks(setup: collections.abc.Callable[..., tests.fixtures.base.LogCapture]) -> None:
     capture = setup(rotation='1 KB')
 
     log_until_rotated()
@@ -41,7 +42,7 @@ def test_rotation_rolls_both_file_sinks(setup: typing.Callable[..., tests.fixtur
     assert len(rolled(capture.directory, '.jsonl')) > 1
 
 
-def test_retention_expires_rolled_files(setup: typing.Callable[..., tests.fixtures.base.LogCapture]) -> None:
+def test_retention_expires_rolled_files(setup: collections.abc.Callable[..., tests.fixtures.base.LogCapture]) -> None:
     capture = setup(rotation='1 KB', retention=1)
 
     log_until_rotated()
@@ -51,7 +52,7 @@ def test_retention_expires_rolled_files(setup: typing.Callable[..., tests.fixtur
     assert len(rolled(capture.directory, '.jsonl')) <= 2
 
 
-def test_rotation_does_not_lose_records(setup: typing.Callable[..., tests.fixtures.base.LogCapture]) -> None:
+def test_rotation_does_not_lose_records(setup: collections.abc.Callable[..., tests.fixtures.base.LogCapture]) -> None:
     """A rolled sink is still an audit trail: the records are on disk, not dropped."""
     capture = setup(rotation='1 KB')
 

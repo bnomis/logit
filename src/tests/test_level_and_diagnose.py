@@ -6,17 +6,22 @@ import pytest
 import tests.emitters.secrets
 
 if typing.TYPE_CHECKING:
+    import collections.abc
+
     import tests.fixtures.base
+
+
+ALL_MESSAGES = ['a debug', 'an info', 'a warning']
 
 
 def log_the_failure() -> None:
     try:
         tests.emitters.secrets.call_api()
-    except RuntimeError as e:
-        loguru.logger.exception(f'search failed: {e}')
+    except RuntimeError:
+        loguru.logger.exception('search failed')
 
 
-def test_diagnose_is_off_by_default(setup: typing.Callable[..., tests.fixtures.base.LogCapture]) -> None:
+def test_diagnose_is_off_by_default(setup: collections.abc.Callable[..., tests.fixtures.base.LogCapture]) -> None:
     """Frame values are not rendered, so a secret on a traceback line is not logged.
 
     loguru defaults diagnose to True, which annotates the value of every
@@ -32,7 +37,7 @@ def test_diagnose_is_off_by_default(setup: typing.Callable[..., tests.fixtures.b
     assert tests.emitters.secrets.SECRET not in capture.jsonl_text()
 
 
-def test_diagnose_still_reports_the_exception(setup: typing.Callable[..., tests.fixtures.base.LogCapture]) -> None:
+def test_diagnose_still_reports_the_exception(setup: collections.abc.Callable[..., tests.fixtures.base.LogCapture]) -> None:
     """Turning diagnose off keeps the traceback and the exception type."""
     capture = setup()
     log_the_failure()
@@ -44,7 +49,7 @@ def test_diagnose_still_reports_the_exception(setup: typing.Callable[..., tests.
     assert 'call_api' in stderr
 
 
-def test_diagnose_can_be_turned_on(setup: typing.Callable[..., tests.fixtures.base.LogCapture]) -> None:
+def test_diagnose_can_be_turned_on(setup: collections.abc.Callable[..., tests.fixtures.base.LogCapture]) -> None:
     """The old behaviour is available for local debugging when asked for."""
     capture = setup(diagnose=True)
     log_the_failure()
@@ -56,14 +61,14 @@ def test_diagnose_can_be_turned_on(setup: typing.Callable[..., tests.fixtures.ba
 @pytest.mark.parametrize(
     ('level', 'emitted', 'dropped'),
     [
-        ('DEBUG', ['a debug', 'an info', 'a warning'], []),
+        ('DEBUG', ALL_MESSAGES, []),
         ('INFO', ['an info', 'a warning'], ['a debug']),
         ('WARNING', ['a warning'], ['a debug', 'an info']),
-        ('ERROR', [], ['a debug', 'an info', 'a warning']),
+        ('ERROR', [], ALL_MESSAGES),
     ],
 )
 def test_level_filters_every_sink(
-    setup: typing.Callable[..., tests.fixtures.base.LogCapture],
+    setup: collections.abc.Callable[..., tests.fixtures.base.LogCapture],
     level: str,
     emitted: list[str],
     dropped: list[str],
@@ -91,7 +96,7 @@ def test_level_filters_every_sink(
         assert message not in stderr
 
 
-def test_level_defaults_to_debug(setup: typing.Callable[..., tests.fixtures.base.LogCapture]) -> None:
+def test_level_defaults_to_debug(setup: collections.abc.Callable[..., tests.fixtures.base.LogCapture]) -> None:
     """Omitting level keeps the previous behaviour of emitting everything."""
     capture = setup()
     loguru.logger.debug('a debug')
@@ -103,7 +108,7 @@ def test_level_defaults_to_debug(setup: typing.Callable[..., tests.fixtures.base
 class TestStderrLevel:
     """The terminal can be quieter than the files."""
 
-    def test_stderr_level_defaults_to_level(self, setup: typing.Callable[..., tests.fixtures.base.LogCapture]) -> None:
+    def test_stderr_level_defaults_to_level(self, setup: collections.abc.Callable[..., tests.fixtures.base.LogCapture]) -> None:
         """Omitting stderr_level keeps every sink on the same level."""
         capture = setup(level='WARNING')
         loguru.logger.info('an info')
@@ -114,7 +119,7 @@ class TestStderrLevel:
         assert 'an info' not in capture.text()
         assert 'a warning' in capture.stderr()
 
-    def test_files_can_record_more_than_the_terminal(self, setup: typing.Callable[..., tests.fixtures.base.LogCapture]) -> None:
+    def test_files_can_record_more_than_the_terminal(self, setup: collections.abc.Callable[..., tests.fixtures.base.LogCapture]) -> None:
         """A quieter terminal still leaves a complete audit trail on disk."""
         capture = setup(level='DEBUG', stderr_level='INFO')
         loguru.logger.debug('a debug')
@@ -126,7 +131,7 @@ class TestStderrLevel:
         assert 'a debug' in capture.messages()
         assert 'an info' in capture.stderr()
 
-    def test_an_exception_reaches_the_files_only(self, setup: typing.Callable[..., tests.fixtures.base.LogCapture]) -> None:
+    def test_an_exception_reaches_the_files_only(self, setup: collections.abc.Callable[..., tests.fixtures.base.LogCapture]) -> None:
         """A traceback logged below the terminal level is still recorded.
 
         This is what lets a CLI show a one-line error while keeping the full

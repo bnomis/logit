@@ -1,3 +1,4 @@
+import collections.abc
 import contextlib
 import datetime
 import inspect
@@ -21,8 +22,8 @@ DEFAULT_LEVEL = 'DEBUG'
 
 # loguru accepts several spellings for each of these; mirroring its own
 # accepted types keeps the wrapper from narrowing what callers can pass.
-type RotationSpec = str | int | datetime.time | datetime.timedelta | typing.Callable[..., typing.Any] | None
-type RetentionSpec = str | int | datetime.timedelta | typing.Callable[..., typing.Any] | None
+type RotationSpec = str | int | datetime.time | datetime.timedelta | collections.abc.Callable[..., typing.Any] | None
+type RetentionSpec = str | int | datetime.timedelta | collections.abc.Callable[..., typing.Any] | None
 
 RECORD_FORMAT = '{time:YYYY-MM-DDTHH:mm:ss!UTC} {level: <8} {file}:{line}/{function} {message}'
 STDERR_FORMAT = RECORD_FORMAT.replace('{level: <8}', '<level>{level: <8}</level>').replace('{file}', '{process.id} {thread.id} {file}')

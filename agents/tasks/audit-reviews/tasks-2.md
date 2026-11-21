@@ -48,7 +48,7 @@ pre-commit hooks are ruff, ruff-format and shellcheck; none runs at pre-push.
 
 ## Task 2: Tidy the sweep hits in tests, emitters and the demo
 
-**Status:** todo
+**Status:** done
 **Priority:** medium
 **Complexity:** medium
 **Source Reference:** review-2 mechanical findings M-alias, M-dict, M-literal, M-jsonl, M-interp; Phase B A14 row at `src/tests/fixtures/base.py:34`
@@ -57,20 +57,20 @@ pre-commit hooks are ruff, ruff-format and shellcheck; none runs at pre-push.
 
 **Subtasks:**
 
-- [ ] Replace every `typing.Callable` and `typing.Generator` with `collections.abc.Callable` / `collections.abc.Generator`: `src/logit/base.py:24-25`, the fixture signatures (now in `src/tests/fixtures/base.py`), and the test signatures in `test_level_and_diagnose.py`, `test_rotation.py`, `test_selective.py`, `test_sinks.py`, `test_warnings.py`. In test files, import `collections.abc` inside the existing `if typing.TYPE_CHECKING:` block
-- [ ] Annotate `LogCapture.find` and `counting_loads` (`src/tests/test_sinks.py:61`) as returning `dict[str, typing.Any]`; give `records()` and `records_cache` the same element type
-- [ ] Hoist `['a debug', 'an info', 'a warning']` in `src/tests/test_level_and_diagnose.py` to a module constant `ALL_MESSAGES` used by the DEBUG and ERROR parametrize rows
-- [ ] Add `LogCapture.jsonl_path()` returning `logit.jsonl_file(directory=self.directory, subprocess=self.subprocess)`, and call it from `records()` and `jsonl_text()`
-- [ ] Drop `: {e}` and the `as e` binding from the `logger.exception` calls at `src/tests/emitters/some_lib.py:23`, `unwanted.py:23`, `wanted.py:23`, `src/tests/test_level_and_diagnose.py:16` and `bin/demo-logging.py:39`, without changing which line each call is on
+- [x] Replace every `typing.Callable` and `typing.Generator` with `collections.abc.Callable` / `collections.abc.Generator`: `src/logit/base.py:24-25`, the fixture signatures (now in `src/tests/fixtures/base.py`), and the test signatures in `test_level_and_diagnose.py`, `test_rotation.py`, `test_selective.py`, `test_sinks.py`, `test_warnings.py`. In test files, import `collections.abc` inside the existing `if typing.TYPE_CHECKING:` block
+- [x] Annotate `LogCapture.find` and `counting_loads` (`src/tests/test_sinks.py:61`) as returning `dict[str, typing.Any]`; give `records()` and `records_cache` the same element type
+- [x] Hoist `['a debug', 'an info', 'a warning']` in `src/tests/test_level_and_diagnose.py` to a module constant `ALL_MESSAGES` used by the DEBUG and ERROR parametrize rows
+- [x] Add `LogCapture.jsonl_path()` returning `logit.jsonl_file(directory=self.directory, subprocess=self.subprocess)`, and call it from `records()` and `jsonl_text()`
+- [x] Drop `: {e}` and the `as e` binding from the `logger.exception` calls at `src/tests/emitters/some_lib.py:23`, `unwanted.py:23`, `wanted.py:23`, `src/tests/test_level_and_diagnose.py:16` and `bin/demo-logging.py:39`, without changing which line each call is on
 
 **Acceptance Criteria:**
 
-- [ ] `python3 ~/.claude/skills/auditme/checks/audit.py .` reports no unaccepted `typing-deprecated-alias`, `bare-parametric-annotation`, `literal-duplication`, `duplicate-side-effect-per-target` or `except-interpolation` hit
+- [x] `python3 ~/.claude/skills/auditme/checks/audit.py .` reports no unaccepted `typing-deprecated-alias`, `bare-parametric-annotation`, `literal-duplication`, `duplicate-side-effect-per-target` or `except-interpolation` hit
 
 **Definition of Done:**
 
-- [ ] The task's commit passes its pre-commit hooks (never `--no-verify`)
-- [ ] `pytest -m "not slow" src/tests` passes (the signature changes touch every test module)
+- [x] The task's commit passes its pre-commit hooks (never `--no-verify`)
+- [x] `pytest -m "not slow" src/tests` passes (the signature changes touch every test module)
 
 **Notes:**
 

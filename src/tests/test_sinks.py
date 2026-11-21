@@ -9,6 +9,7 @@ import pytest
 import logit
 
 if typing.TYPE_CHECKING:
+    import collections.abc
     import pathlib
 
     import tests.fixtures.base
@@ -58,7 +59,7 @@ def test_find_parses_the_sink_once_across_repeated_calls(
     real_loads = json.loads
     parsed_lines = []
 
-    def counting_loads(line: str) -> dict:
+    def counting_loads(line: str) -> dict[str, typing.Any]:
         parsed_lines.append(line)
         return real_loads(line)
 
@@ -86,7 +87,7 @@ def test_cache_does_not_mask_records_written_between_assertions(capture: tests.f
     assert capture.messages() == ['first batch', 'second batch']
 
 
-def test_subprocess_mode_uses_per_pid_filenames(setup: typing.Callable[..., tests.fixtures.base.LogCapture]) -> None:
+def test_subprocess_mode_uses_per_pid_filenames(setup: collections.abc.Callable[..., tests.fixtures.base.LogCapture]) -> None:
     capture = setup(subprocess=True)
     loguru.logger.info('from a child')
 

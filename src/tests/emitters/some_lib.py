@@ -19,5 +19,5 @@ def func() -> None:
     try:
         logger.info('Rasising an exception in some_lib.py')
         raise ValueError('This is a test exception from some_lib.py')
-    except ValueError as e:
-        logger.exception(f'Caught an exception in some_lib.py: {e}')
+    except ValueError:
+        logger.exception('Caught an exception in some_lib.py')

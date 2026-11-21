@@ -12,6 +12,7 @@ import logit
 import logit.base
 
 if typing.TYPE_CHECKING:
+    import collections.abc
     import pathlib
 
 
@@ -26,16 +27,19 @@ class LogCapture:
         self.directory = directory
         self.stderr_stream = stderr
         self.subprocess = subprocess
-        self.records_cache: list[dict] = []
+        self.records_cache: list[dict[str, typing.Any]] = []
         self.records_cache_stat: tuple[int, int] | None = None
+
+    def jsonl_path(self) -> pathlib.Path:
+        return logit.jsonl_file(directory=self.directory, subprocess=self.subprocess)
 
     def complete(self) -> None:
         # every sink uses enqueue=True and writes from a background thread
         loguru.logger.complete()
 
-    def records(self) -> list[dict]:
+    def records(self) -> list[dict[str, typing.Any]]:
         self.complete()
-        path = logit.jsonl_file(directory=self.directory, subprocess=self.subprocess)
+        path = self.jsonl_path()
         if not path.exists():
             self.records_cache = []
             self.records_cache_stat = None
@@ -54,7 +58,7 @@ class LogCapture:
     def names(self) -> set[str]:
         return {r['name'] for r in self.records()}
 
-    def find(self, message: str) -> dict:
+    def find(self, message: str) -> dict[str, typing.Any]:
         records = self.records()
         matches = [r for r in records if r['message'] == message]
         if len(matches) != 1:
@@ -62,10 +66,10 @@ class LogCapture:
             raise AssertionError(f'expected exactly 1 record with message {message!r}, got {len(matches)}: {messages}')
         return matches[0]
 
-    def matching(self, substring: str) -> list[dict]:
+    def matching(self, substring: str) -> list[dict[str, typing.Any]]:
         return [r for r in self.records() if substring in r['message']]
 
-    def from_module(self, name: str) -> list[dict]:
+    def from_module(self, name: str) -> list[dict[str, typing.Any]]:
         return [r for r in self.records() if r['name'] == name]
 
     def text(self) -> str:
@@ -76,7 +80,7 @@ class LogCapture:
     def jsonl_text(self) -> str:
         """Raw jsonl sink contents, for asserting on what was serialised."""
         self.complete()
-        path = logit.jsonl_file(directory=self.directory, subprocess=self.subprocess)
+        path = self.jsonl_path()
         return path.read_text() if path.exists() else ''
 
     def stderr(self) -> str:
@@ -84,7 +88,7 @@ class LogCapture:
         return self.stderr_stream.getvalue()
 
     @contextlib.contextmanager
-    def redirect(self) -> typing.Generator[None]:
+    def redirect(self) -> collections.abc.Generator[None]:
         """Route print()/stdout/stderr through StreamToLogger, as the app does."""
         out = logit.StreamToLogger(level='INFO')
         err = logit.StreamToLogger(level='ERROR')
@@ -93,7 +97,7 @@ class LogCapture:
 
 
 @pytest.fixture
-def capture(tmp_path: pathlib.Path) -> typing.Generator[LogCapture]:
+def capture(tmp_path: pathlib.Path) -> collections.abc.Generator[LogCapture]:
     """Configure logit into a temp dir and hand back a reader for its sinks.
 
     loguru, stdlib logging and warnings are all process-global, so teardown has
@@ -133,7 +137,7 @@ def make_capture(
 
 
 @pytest.fixture
-def setup(tmp_path: pathlib.Path) -> typing.Generator[typing.Callable[..., LogCapture]]:
+def setup(tmp_path: pathlib.Path) -> collections.abc.Generator[collections.abc.Callable[..., LogCapture]]:
     """Like `capture`, but lets a test choose `disabled` / `subprocess` itself."""
     stdout_, stderr_ = sys.stdout, sys.stderr
     handlers_ = logging.root.handlers[:]

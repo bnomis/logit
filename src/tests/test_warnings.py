@@ -6,6 +6,8 @@ import logit
 import tests.emitters.wanted
 
 if typing.TYPE_CHECKING:
+    import collections.abc
+
     import pytest
 
     import tests.fixtures.base
@@ -122,7 +124,7 @@ def test_source_line_lookup_failure_still_logs_the_warning(capture: tests.fixtur
     ]
 
 
-def test_setup_installs_the_hook_and_reset_restores_it(setup: typing.Callable[..., tests.fixtures.base.LogCapture]) -> None:
+def test_setup_installs_the_hook_and_reset_restores_it(setup: collections.abc.Callable[..., tests.fixtures.base.LogCapture]) -> None:
     original = warnings.showwarning
     setup()
     assert warnings.showwarning is logit.showwarning

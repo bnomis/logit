@@ -35,8 +35,8 @@ def log_messages() -> None:
     try:
         loguru.logger.info('Raising an exception in demo-logging.py')
         raise ValueError('This is a test exception from demo-logging.py')
-    except ValueError as e:
-        loguru.logger.exception(f'Caught an exception in demo-logging.py: {e}')
+    except ValueError:
+        loguru.logger.exception('Caught an exception in demo-logging.py')
 
 
 def emit_all() -> None:
