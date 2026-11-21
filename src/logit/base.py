@@ -182,6 +182,20 @@ class StreamToLogger:
         pass
 
 
+@contextlib.contextmanager
+def redirect_streams(stdout_level: str = 'INFO', stderr_level: str = 'ERROR') -> collections.abc.Generator[None]:
+    """Route stdout and stderr through loguru for the duration of the block.
+
+    `print()` output lands at `stdout_level` and anything written to stderr at
+    `stderr_level`. Both streams are restored on exit, including after an exception.
+    """
+    with (
+        contextlib.redirect_stdout(StreamToLogger(level=stdout_level)),  # type: ignore[type-var]
+        contextlib.redirect_stderr(StreamToLogger(level=stderr_level)),  # type: ignore[type-var]
+    ):
+        yield
+
+
 def take_over_logging(disabled: list[str] | None = None) -> None:
     config_logger_default(disabled=disabled)
 

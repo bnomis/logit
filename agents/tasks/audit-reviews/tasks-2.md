@@ -176,7 +176,7 @@ pre-commit hooks are ruff, ruff-format and shellcheck; none runs at pre-push.
 
 ## Task 6: Add logit.redirect_streams()
 
-**Status:** todo
+**Status:** done
 **Priority:** medium
 **Complexity:** medium
 **Source Reference:** review-2 decision D1 (finding P5)
@@ -185,22 +185,22 @@ pre-commit hooks are ruff, ruff-format and shellcheck; none runs at pre-push.
 
 **Subtasks:**
 
-- [ ] Add a `@contextlib.contextmanager` `redirect_streams(stdout_level: str = 'INFO', stderr_level: str = 'ERROR')` to `src/logit/base.py`, with a docstring, that enters `contextlib.redirect_stdout(StreamToLogger(level=stdout_level))` and `contextlib.redirect_stderr(StreamToLogger(level=stderr_level))`
-- [ ] Export it in `src/logit/__init__.py` and `__all__` (keep the order ruff's RUF022 writes)
-- [ ] Use it in `bin/demo-logging.py` (`subprocess_entrypoint` and `main`) and in `LogCapture.redirect`
-- [ ] Add tests to `src/tests/test_streams.py`: stdout lands at INFO and stderr at ERROR by default; custom levels are honoured; a `print()` inside it is attributed to the caller's file and line; `sys.stdout`/`sys.stderr` are restored on exit, including after an exception
-- [ ] Document it in README.md's Usage section beside `StreamToLogger`
+- [x] Add a `@contextlib.contextmanager` `redirect_streams(stdout_level: str = 'INFO', stderr_level: str = 'ERROR')` to `src/logit/base.py`, with a docstring, that enters `contextlib.redirect_stdout(StreamToLogger(level=stdout_level))` and `contextlib.redirect_stderr(StreamToLogger(level=stderr_level))`
+- [x] Export it in `src/logit/__init__.py` and `__all__` (keep the order ruff's RUF022 writes)
+- [x] Use it in `bin/demo-logging.py` (`subprocess_entrypoint` and `main`) and in `LogCapture.redirect`
+- [x] Add tests to `src/tests/test_streams.py`: stdout lands at INFO and stderr at ERROR by default; custom levels are honoured; a `print()` inside it is attributed to the caller's file and line; `sys.stdout`/`sys.stderr` are restored on exit, including after an exception
+- [x] Document it in README.md's Usage section beside `StreamToLogger`
 
 **Acceptance Criteria:**
 
-- [ ] No file builds the INFO/ERROR `StreamToLogger` pair by hand
-- [ ] README.md shows `logit.redirect_streams()`
+- [x] No file builds the INFO/ERROR `StreamToLogger` pair by hand
+- [x] README.md shows `logit.redirect_streams()`
 
 **Definition of Done:**
 
-- [ ] The task's commit passes its pre-commit hooks (never `--no-verify`)
-- [ ] `pytest src/tests/test_streams.py src/tests/test_selective.py -m "not slow"` passes
-- [ ] `bin/demo-logging.sh` runs to completion
+- [x] The task's commit passes its pre-commit hooks (never `--no-verify`)
+- [x] `pytest src/tests/test_streams.py src/tests/test_selective.py -m "not slow"` passes
+- [x] `bin/demo-logging.sh` runs to completion
 
 **Notes:**
 

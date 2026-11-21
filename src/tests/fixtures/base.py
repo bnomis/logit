@@ -89,10 +89,8 @@ class LogCapture:
 
     @contextlib.contextmanager
     def redirect(self) -> collections.abc.Generator[None]:
-        """Route print()/stdout/stderr through StreamToLogger, as the app does."""
-        out = logit.StreamToLogger(level='INFO')
-        err = logit.StreamToLogger(level='ERROR')
-        with contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):  # type: ignore
+        """Route print()/stdout/stderr through loguru, as the app does."""
+        with logit.redirect_streams():
             yield
 
 

@@ -78,6 +78,16 @@ with contextlib.redirect_stdout(logit.StreamToLogger(level='INFO')):
     print('captured as an INFO log record')
 ```
 
+`logit.redirect_streams()` does that for both streams at once: stdout goes to
+INFO and stderr to ERROR (override with `stdout_level` / `stderr_level`), and
+both are restored on exit, even after an exception:
+
+```python
+with logit.redirect_streams():
+    print('captured as an INFO log record')
+    print('captured as an ERROR log record', file=sys.stderr)
+```
+
 `logit.showwarning` is the `warnings.showwarning` replacement `setup_logger`
 installs; it is exported for direct use in tests or other warning setups.
 

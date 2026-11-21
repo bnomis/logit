@@ -4,7 +4,6 @@
 Writes to log/ in the repo. For assertions on this behaviour see src/tests/.
 """
 
-import contextlib
 import multiprocessing
 import sys
 import threading
@@ -48,9 +47,7 @@ def emit_all() -> None:
 
 def subprocess_entrypoint() -> None:
     logit.setup_logger(disabled=DISABLED, subprocess=True)
-    stdout_stream = logit.StreamToLogger(level='INFO')
-    stderr_stream = logit.StreamToLogger(level='ERROR')
-    with contextlib.redirect_stdout(stdout_stream), contextlib.redirect_stderr(stderr_stream):  # type: ignore
+    with logit.redirect_streams():
         emit_all()
     loguru.logger.complete()
 
@@ -84,9 +81,7 @@ def demo_threads() -> None:
 
 def main() -> None:
     logit.setup_logger(disabled=DISABLED)
-    stdout_stream = logit.StreamToLogger(level='INFO')
-    stderr_stream = logit.StreamToLogger(level='ERROR')
-    with contextlib.redirect_stdout(stdout_stream), contextlib.redirect_stderr(stderr_stream):  # type: ignore
+    with logit.redirect_streams():
         emit_all()
         demo_joblib()
         demo_multiprocessing()
