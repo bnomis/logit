@@ -24,6 +24,8 @@ logit.setup_logger(
     level='DEBUG',  # minimum level emitted by the file sinks
     stderr_level=None,  # terminal level; defaults to `level`
     diagnose=False,  # render frame values in tracebacks
+    rotation=None,  # when to start a new file sink; None never rotates
+    retention=None,  # how long rotated files are kept; None keeps them all
 )
 ```
 
@@ -48,12 +50,25 @@ Turning it on is useful for local debugging. The traceback, the exception
 type and the call stack are reported either way; only the values are
 withheld.
 
+`rotation` says when to close the current file sink and start a new one: a
+size (`'10 MB'`), an interval (`'1 week'`), a time of day, or a callable, as
+in loguru. It applies to both file sinks; the terminal sink has no file to
+roll. The default `None` never rotates, which suits a consumer that manages
+its own log lifetime. Set it if you keep an unbounded audit trail, because
+nothing else here caps growth.
+
+`retention` says how long rotated files are kept: a count (`5`), an age
+(`'30 days'`), or a callable, as in loguru. The default `None` keeps them
+forever. It only matters alongside `rotation`: without it there is never more
+than one file per sink to expire.
+
 `setup_logger` intercepts stdlib `logging`, Python `warnings`, and installs
 three loguru sinks:
 
 - stderr - human-readable, colour output, tagged with process and thread id
 - `log.log` (in `directory`, or `log-<pid>.log` when `subprocess=True`) -
-  the same record format as stderr, without colour
+  the stderr record format without colour and without the process and thread
+  ids
 - `log.jsonl` (or `log-<pid>.jsonl` when `subprocess=True`) - one JSON object
   per record, including the origin module, source location, level, and
   process/thread identity

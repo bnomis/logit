@@ -211,7 +211,7 @@ pre-commit hooks are ruff, ruff-format and shellcheck; none runs at pre-push.
 
 ## Task 7: Correct README.md and AGENTS.md
 
-**Status:** todo
+**Status:** done
 **Priority:** high
 **Complexity:** small
 **Source Reference:** review-2 findings P11 (medium), P9, P10; decision D2
@@ -220,20 +220,20 @@ pre-commit hooks are ruff, ruff-format and shellcheck; none runs at pre-push.
 
 **Subtasks:**
 
-- [ ] P11: in README.md, say `log.log` has the stderr record format without colour and without the process and thread ids
-- [ ] In README.md's `setup_logger(...)` example, add the `rotation` and `retention` parameters with their defaults, and a short paragraph on each (from the `setup_logger` docstring). This one is not a review-2 item: the example lists every other parameter and omits these two, and the user-guide rule requires every option to be documented
-- [ ] P9: in AGENTS.md's Multi-Output Configuration list, say `log/log.log` and `log/log.jsonl` are written at run time and `log/` is git-ignored
-- [ ] P10: add to AGENTS.md's Tools and Libraries `hypothesis` (property tests in `src/tests/test_streams.py`), and `ruff` and `shellcheck` (run through pre-commit)
-- [ ] D2: add a line to AGENTS.md's Tests section saying `base.py`'s tests are split by capture path on purpose rather than mirrored as `test_base.py`; add the missing `test_level_and_diagnose.py` and `test_rotation.py` rows to its table
+- [x] P11: in README.md, say `log.log` has the stderr record format without colour and without the process and thread ids
+- [x] In README.md's `setup_logger(...)` example, add the `rotation` and `retention` parameters with their defaults, and a short paragraph on each (from the `setup_logger` docstring). This one is not a review-2 item: the example lists every other parameter and omits these two, and the user-guide rule requires every option to be documented
+- [x] P9: in AGENTS.md's Multi-Output Configuration list, say `log/log.log` and `log/log.jsonl` are written at run time and `log/` is git-ignored
+- [x] P10: add to AGENTS.md's Tools and Libraries `hypothesis` (property tests in `src/tests/test_streams.py`), and `ruff` and `shellcheck` (run through pre-commit)
+- [x] D2: add a line to AGENTS.md's Tests section saying `base.py`'s tests are split by capture path on purpose rather than mirrored as `test_base.py`; add the missing `test_level_and_diagnose.py` and `test_rotation.py` rows to its table
 
 **Acceptance Criteria:**
 
-- [ ] Every parameter of `setup_logger` appears in README.md's example
-- [ ] AGENTS.md's tools list names every declared dependency and every pre-commit hook's tool
+- [x] Every parameter of `setup_logger` appears in README.md's example
+- [x] AGENTS.md's tools list names every declared dependency and every pre-commit hook's tool
 
 **Definition of Done:**
 
-- [ ] The task's commit passes its pre-commit hooks (never `--no-verify`)
+- [x] The task's commit passes its pre-commit hooks (never `--no-verify`)
 
 **Notes:**
 
