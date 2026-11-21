@@ -35,14 +35,16 @@ The core logging architecture is in [src/logit/base.py](src/logit/base.py):
    - `log/log.log`: Plain text log file
    - `log/log.jsonl`: JSON Lines format for structured logging
 
+   Both files are written at run time; `log/` is git-ignored.
+
 ### Module Structure
 
 - [src/logit/**init**.py](src/logit/__init__.py): public API re-exports (`__all__`)
 - [src/logit/base.py](src/logit/base.py): Core logging setup and configuration
 - [bin/demo-logging.py](bin/demo-logging.py): visual demo of every capture path, run via [bin/demo-logging.sh](bin/demo-logging.sh)
-- [src/tests/conftest.py](src/tests/conftest.py): `capture` and `setup` fixtures shared across the test suite
+- [src/tests/conftest.py](src/tests/conftest.py): loads the fixtures plugin (`pytest_plugins`); defines no fixture itself
 - [src/tests/emitters/](src/tests/emitters): modules that emit on every capture path, used as test subjects
-- [src/tests/fixtures/base.py](src/tests/fixtures/base.py): `LogCapture`, which reads the sinks back for assertions
+- [src/tests/fixtures/base.py](src/tests/fixtures/base.py): `LogCapture`, which reads the sinks back for assertions, and the `capture` and `setup` fixtures shared across the test suite
 
 ### Tests
 
@@ -55,6 +57,9 @@ The `capture` fixture configures logit into a `tmp_path` and hands back a
 `LogCapture`. Use `setup` instead when a test needs to choose `disabled` or
 `subprocess`. Both restore the global loguru/logging/warnings state on teardown.
 
+`base.py`'s tests are split by capture path on purpose, rather than mirrored
+as a single `test_base.py`.
+
 | File | Covers |
 | --- | --- |
 | `test_sinks.py` | one record reaching stderr, `log.log` and `log.jsonl` consistently |
@@ -62,6 +67,8 @@ The `capture` fixture configures logit into a `tmp_path` and hands back a
 | `test_streams.py` | `print()` / stdout / stderr via `StreamToLogger` |
 | `test_warnings.py` | `warnings.warn` and direct `showwarning` calls |
 | `test_selective.py` | enabled vs disabled module routing across all five paths |
+| `test_level_and_diagnose.py` | `level`, `stderr_level` and `diagnose` |
+| `test_rotation.py` | `rotation` and `retention` on the file sinks |
 | `test_concurrency.py` | threads, `multiprocessing`, joblib, per-pid files (`slow`) |
 
 ```shell
@@ -75,6 +82,9 @@ pytest -m slow          # forking tests
 - [loguru](https://loguru.readthedocs.io/en/stable/): the logging library this project wraps
 - [joblib](https://joblib.readthedocs.io/en/stable/): dev dependency, used by `bin/demo-logging.py` and `src/tests/test_concurrency.py` to demonstrate/exercise per-process logging
 - [pytest](https://docs.pytest.org/en/stable/): test runner
+- [hypothesis](https://hypothesis.readthedocs.io/en/latest/): dev dependency, property tests in `src/tests/test_streams.py`
+- [ruff](https://docs.astral.sh/ruff/): linter and formatter, run through pre-commit
+- [shellcheck](https://www.shellcheck.net/): shell script linter, run through pre-commit
 - [uv](https://docs.astral.sh/uv/): package and virtual environment management
 
 ## Key Implementation Details

@@ -1,5 +1,5 @@
 import inspect
-import logging
+import logging  # auditme: accept[stdlib-logging] drives stdlib logging into the interceptor
 import typing
 
 import pytest

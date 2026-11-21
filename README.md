@@ -17,13 +17,15 @@ plus `pytest` and `hypothesis` for the test suite.
 import logit
 
 logit.setup_logger(
-    directory=None,       # defaults to <package>/../../log
-    stderr=None,          # defaults to sys.__stderr__
-    disabled=[],          # dotted module names to silence
-    subprocess=False,     # per-pid file names instead of shared ones
-    level='DEBUG',        # minimum level emitted by the file sinks
-    stderr_level=None,    # terminal level; defaults to `level`
-    diagnose=False,       # render frame values in tracebacks
+    directory=None,  # defaults to <package>/../../log
+    stderr=None,  # defaults to sys.__stderr__
+    disabled=[],  # dotted module names to silence
+    subprocess=False,  # per-pid file names instead of shared ones
+    level='DEBUG',  # minimum level emitted by the file sinks
+    stderr_level=None,  # terminal level; defaults to `level`
+    diagnose=False,  # render frame values in tracebacks
+    rotation=None,  # when to start a new file sink; None never rotates
+    retention=None,  # how long rotated files are kept; None keeps them all
 )
 ```
 
@@ -48,12 +50,25 @@ Turning it on is useful for local debugging. The traceback, the exception
 type and the call stack are reported either way; only the values are
 withheld.
 
+`rotation` says when to close the current file sink and start a new one: a
+size (`'10 MB'`), an interval (`'1 week'`), a time of day, or a callable, as
+in loguru. It applies to both file sinks; the terminal sink has no file to
+roll. The default `None` never rotates, which suits a consumer that manages
+its own log lifetime. Set it if you keep an unbounded audit trail, because
+nothing else here caps growth.
+
+`retention` says how long rotated files are kept: a count (`5`), an age
+(`'30 days'`), or a callable, as in loguru. The default `None` keeps them
+forever. It only matters alongside `rotation`: without it there is never more
+than one file per sink to expire.
+
 `setup_logger` intercepts stdlib `logging`, Python `warnings`, and installs
 three loguru sinks:
 
 - stderr - human-readable, colour output, tagged with process and thread id
 - `log.log` (in `directory`, or `log-<pid>.log` when `subprocess=True`) -
-  the same record format as stderr, without colour
+  the stderr record format without colour and without the process and thread
+  ids
 - `log.jsonl` (or `log-<pid>.jsonl` when `subprocess=True`) - one JSON object
   per record, including the origin module, source location, level, and
   process/thread identity
@@ -76,6 +91,16 @@ through loguru, typically via `contextlib.redirect_stdout`/`redirect_stderr`:
 ```python
 with contextlib.redirect_stdout(logit.StreamToLogger(level='INFO')):
     print('captured as an INFO log record')
+```
+
+`logit.redirect_streams()` does that for both streams at once: stdout goes to
+INFO and stderr to ERROR (override with `stdout_level` / `stderr_level`), and
+both are restored on exit, even after an exception:
+
+```python
+with logit.redirect_streams():
+    print('captured as an INFO log record')
+    print('captured as an ERROR log record', file=sys.stderr)
 ```
 
 `logit.showwarning` is the `warnings.showwarning` replacement `setup_logger`

@@ -1,4 +1,4 @@
-import logging
+import logging  # auditme: accept[stdlib-logging] emitter logs through stdlib logging to exercise the interceptor
 import sys
 import warnings
 
@@ -19,5 +19,5 @@ def func() -> None:
     try:
         logger.info('Rasising an exception in unwanted.py')
         raise ValueError('This is a test exception from unwanted.py')
-    except ValueError as e:
-        logger.exception(f'Caught an exception in unwanted.py: {e}')
+    except ValueError:
+        logger.exception('Caught an exception in unwanted.py')

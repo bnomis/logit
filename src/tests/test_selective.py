@@ -9,6 +9,8 @@ import tests.emitters.unwanted
 import tests.emitters.wanted
 
 if typing.TYPE_CHECKING:
+    import collections.abc
+
     import tests.fixtures.base
 
 UNWANTED = 'tests.emitters.unwanted'
@@ -28,7 +30,7 @@ def run_all(capture: tests.fixtures.base.LogCapture) -> None:
             module.func()
 
 
-def test_disabled_module_is_completely_silent(setup: typing.Callable[..., tests.fixtures.base.LogCapture]) -> None:
+def test_disabled_module_is_completely_silent(setup: collections.abc.Callable[..., tests.fixtures.base.LogCapture]) -> None:
     capture = setup(disabled=[UNWANTED])
     run_all(capture)
 
@@ -37,7 +39,7 @@ def test_disabled_module_is_completely_silent(setup: typing.Callable[..., tests.
     assert 'unwanted.py' not in capture.stderr()
 
 
-def test_enabled_modules_still_log(setup: typing.Callable[..., tests.fixtures.base.LogCapture]) -> None:
+def test_enabled_modules_still_log(setup: collections.abc.Callable[..., tests.fixtures.base.LogCapture]) -> None:
     capture = setup(disabled=[UNWANTED])
     run_all(capture)
 
@@ -57,7 +59,7 @@ PATHS = [
 
 
 @pytest.mark.parametrize('template', PATHS)
-def test_every_capture_path_is_suppressed(setup: typing.Callable[..., tests.fixtures.base.LogCapture], template: str) -> None:
+def test_every_capture_path_is_suppressed(setup: collections.abc.Callable[..., tests.fixtures.base.LogCapture], template: str) -> None:
     """All five routes into loguru must respect the disabled list."""
     capture = setup(disabled=[UNWANTED])
     run_all(capture)
@@ -68,7 +70,7 @@ def test_every_capture_path_is_suppressed(setup: typing.Callable[..., tests.fixt
 
 
 def test_direct_showwarning_is_attributed_to_its_caller_not_its_filename(
-    setup: typing.Callable[..., tests.fixtures.base.LogCapture],
+    setup: collections.abc.Callable[..., tests.fixtures.base.LogCapture],
 ) -> None:
     """The filename argument only feeds linecache; attribution comes from the frame.
 
@@ -84,7 +86,7 @@ def test_direct_showwarning_is_attributed_to_its_caller_not_its_filename(
 
 
 @pytest.mark.parametrize('name', [WANTED, UNWANTED, SOME_LIB])
-def test_any_module_can_be_the_disabled_one(setup: typing.Callable[..., tests.fixtures.base.LogCapture], name: str) -> None:
+def test_any_module_can_be_the_disabled_one(setup: collections.abc.Callable[..., tests.fixtures.base.LogCapture], name: str) -> None:
     capture = setup(disabled=[name])
     run_all(capture)
 
@@ -92,21 +94,21 @@ def test_any_module_can_be_the_disabled_one(setup: typing.Callable[..., tests.fi
     assert capture.names() == set(EMITTERS) - {name}
 
 
-def test_multiple_modules_can_be_disabled(setup: typing.Callable[..., tests.fixtures.base.LogCapture]) -> None:
+def test_multiple_modules_can_be_disabled(setup: collections.abc.Callable[..., tests.fixtures.base.LogCapture]) -> None:
     capture = setup(disabled=[UNWANTED, SOME_LIB])
     run_all(capture)
 
     assert capture.names() == {WANTED}
 
 
-def test_nothing_is_suppressed_by_default(setup: typing.Callable[..., tests.fixtures.base.LogCapture]) -> None:
+def test_nothing_is_suppressed_by_default(setup: collections.abc.Callable[..., tests.fixtures.base.LogCapture]) -> None:
     capture = setup()
     run_all(capture)
 
     assert capture.names() == set(EMITTERS)
 
 
-def test_disabling_covers_submodules(setup: typing.Callable[..., tests.fixtures.base.LogCapture]) -> None:
+def test_disabling_covers_submodules(setup: collections.abc.Callable[..., tests.fixtures.base.LogCapture]) -> None:
     capture = setup(disabled=['tests.emitters'])
     run_all(capture)
 
@@ -114,7 +116,7 @@ def test_disabling_covers_submodules(setup: typing.Callable[..., tests.fixtures.
 
 
 @pytest.mark.parametrize('template', PATHS)
-def test_resetup_re_enables_the_previous_disabled_list(setup: typing.Callable[..., tests.fixtures.base.LogCapture], template: str) -> None:
+def test_resetup_re_enables_the_previous_disabled_list(setup: collections.abc.Callable[..., tests.fixtures.base.LogCapture], template: str) -> None:
     """setup_logger must be idempotent with respect to `disabled` across calls."""
     setup(disabled=[WANTED])
     capture = setup(disabled=[UNWANTED])
@@ -126,7 +128,7 @@ def test_resetup_re_enables_the_previous_disabled_list(setup: typing.Callable[..
 
 
 def test_disabled_state_does_not_grow_across_repeated_setup_calls(
-    setup: typing.Callable[..., tests.fixtures.base.LogCapture],
+    setup: collections.abc.Callable[..., tests.fixtures.base.LogCapture],
 ) -> None:
     setup(disabled=[WANTED])
     setup(disabled=[UNWANTED])
