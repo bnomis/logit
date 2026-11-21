@@ -1,112 +1,80 @@
 # Audit Summary
 
-**Last updated:** 2026-08-04
-**Last review:** review-1
-**Total reviews conducted:** 1
-**Last script run hit count:** 9 (0 accepted)
-**Script version:** ~/.claude/skills/auditme/checks/audit.py, unmodified during review-1
+**Last updated:** 2026-11-21
+**Last review:** review-2
+**Total reviews conducted:** 2
+**Last script run hit count:** 47 (1 accepted)
+**Script version:** `e924b332c5c6809821c1635aa7a1d3714064120de0317c733f7f09dfa6b50537` (digest of `find -L ~/.claude/skills/auditme/checks -name '*.py' | sort | xargs cat | shasum -a 256`)
 
 ## Unresolved findings
 
-### `disabled` state diverges across repeated `setup_logger` calls
+All raised in review-2 (2026-11-21); see review-2 for every location. Answers are collected on the review page named in review-2's header.
 
-- **Rule or category:** A5
-- **Severity:** high
-- **Location:** `src/logit/base.py:239-241`
-- **First raised:** review-1 (2026-08-04)
-- **Description:** `setup_logger` never re-enables names disabled by a previous call, so loguru silences the union of every `disabled` list ever passed while the stdlib-logging and warnings mechanisms track only the newest list.
-- **Recommendation:** drain `disabled_` at the top of `setup_logger` before applying the new list; add a regression test across all five capture paths.
+### README misstates the `log.log` record format
 
-### Dead `LoguruHandler` class
-
-- **Rule or category:** T1
+- **Rule or category:** Doc5
 - **Severity:** medium
-- **Location:** `src/logit/base.py:77-79`
-- **First raised:** review-1 (2026-08-04)
-- **Description:** never instantiated, referenced, exported or tested; also carries the only `legacy-formatting-format` mechanical hit.
-- **Recommendation:** delete it.
+- **Location:** `README.md:55`
+- **First raised:** review-2 (2026-11-21)
+- **Description:** says `log.log` matches the stderr format without colour; only stderr carries the process and thread ids.
+- **Recommendation:** correct the sentence.
 
-### Leading-underscore attribute `StreamToLogger._level`
+### Sweep hits in tests and `bin/`
 
-- **Rule or category:** `leading-underscore-self` / `leading-underscore-attribute-access`
-- **Severity:** medium
-- **Location:** `src/logit/base.py:148,152`
-- **First raised:** review-1 (2026-08-04)
-- **Description:** violates the no-leading-underscores rule in the Python coding standard.
-- **Recommendation:** rename to `level`.
-
-### Silent broad `except` around `linecache.getline`
-
-- **Rule or category:** `silent-broad-except` / A19
-- **Severity:** medium
-- **Location:** `src/logit/base.py:61`
-- **First raised:** review-1 (2026-08-04)
-- **Description:** `except Exception:` with no log and no re-raise, plus a dead `linecache = None` rebind.
-- **Recommendation:** narrow to `except OSError:`, drop the rebind, log at debug.
-
-### Missing type annotations
-
-- **Rule or category:** S1
-- **Severity:** medium
-- **Location:** 70 signatures; package code at `src/logit/base.py:46,78,147,150,154`
-- **First raised:** review-1 (2026-08-04)
-- **Description:** the standard requires parameter and return annotations everywhere, including explicit `-> None`.
-- **Recommendation:** annotate the package and `bin/` first, then emitters and tests.
-
-### `from loguru import logger` violates the full-import-path rule
-
-- **Rule or category:** S4
-- **Severity:** medium
-- **Location:** `src/logit/base.py:11`
-- **First raised:** review-1 (2026-08-04)
-- **Description:** only file in the tree using `from X import Y` outside an `__init__.py` re-export.
-- **Recommendation:** use `import loguru` and qualify the 12 uses.
-
-### README does not describe the project or its API
-
-- **Rule or category:** Doc3
-- **Severity:** medium
-- **Location:** `README.md:1-3`
-- **First raised:** review-1 (2026-08-04)
-- **Description:** three lines, a description that disagrees with AGENTS.md and `pyproject.toml`, and no usage documentation for any exported symbol.
-- **Recommendation:** one agreed description plus a usage section.
-
-### Unaccepted mechanical hits needing accept markers
-
-- **Rule or category:** `stdlib-logging`, `legacy-formatting-format`, `in-function-import`, `non-alphabetical-literal`
+- **Rule or category:** `typing-deprecated-alias`, `stdlib-logging`, `except-interpolation`, `literal-duplication`, `bare-parametric-annotation`, `mutable-module-level-exported`, `ruff-version-drift`, `duplicate-side-effect-per-target`
 - **Severity:** low
-- **Location:** `src/logit/base.py:2,58,79`; `src/logit/__init__.py:3`
-- **First raised:** review-1 (2026-08-04)
-- **Description:** the stdlib logging import is inherent to an interceptor; `self.format(record)` is `logging.Handler.format`, not `str.format`; `import linecache` is a stdlib deferred import with no benefit; `__all__` is unsorted.
-- **Recommendation:** add `# auditme: accept ...` markers for the first two, hoist `linecache`, sort `__all__`.
+- **Location:** 46 hits, nearly all under `src/tests/`; also `src/logit/base.py:24,25,32`, `bin/demo-logging.py:39`, `.pre-commit-config.yaml:4`
+- **First raised:** review-2 (2026-11-21)
+- **Description:** first sweep to read `src/tests/` and `bin/`.
+- **Recommendation:** fix, or accept with rule-scoped markers, as review-2 lists per rule.
 
-### Low-severity remainder
+### Small `base.py` fixes
 
-- **Rule or category:** A1, A15, A14/P3, A17, T2, D2, Doc1/Doc2
+- **Rule or category:** A2, A14, S2, S4
 - **Severity:** low
-- **Location:** `src/logit/base.py:220,226,232` (unguarded sink registration); `:222,228,234` (duplicated format strings); `src/tests/fixtures/base.py:28-51` (records re-parsed per accessor); `src/logit/__init__.py:1,3` (`log_dir` exported but unused); `src/tests/emitters/__init__.py:1` (needs accept marker); `src/tests/test_streams.py` (no property tests); `pyproject.toml:7` (`joblib` in runtime deps); `AGENTS.md` (structure and libraries gaps)
-- **First raised:** review-1 (2026-08-04)
-- **Description:** see review-1 for the individual entries.
-- **Recommendation:** see review-1. Two open options were settled by the user on 2026-08-04: A1 is fixed by rolling back registered sinks on failure (not by documenting the non-atomicity), and A17's `log_dir` is dropped from `__all__` (not kept and tested). Planned in `agents/tasks/audit-reviews/tasks-1.md` Tasks 9 and 11.
+- **Location:** `src/logit/base.py:2,18,40-49,75,84,96-97,287,296-297,308,320,335`
+- **First raised:** review-2 (2026-11-21)
+- **Description:** except tuples missing `UnicodeDecodeError`/`OSError`, `internal_files()` recomputed per warning, `showwarning_` naming, annotation-only `datetime` import, commented-out code.
+- **Recommendation:** see review-2 findings P1, P2, P3, P12, P13, P14.
+
+### AGENTS.md gaps
+
+- **Rule or category:** Doc1, Doc2, Doc3
+- **Severity:** low
+- **Location:** `AGENTS.md:35-36,73`
+- **First raised:** review-2 (2026-11-21)
+- **Description:** run-time log files not marked as such; tools list omits hypothesis, ruff and shellcheck.
+- **Recommendation:** see review-2 findings P9, P10.
+
+### Decided restructuring
+
+- **Rule or category:** A15, S4
+- **Severity:** low
+- **Location:** `bin/demo-logging.py:51,87`, `src/tests/fixtures/base.py:85`, `src/tests/conftest.py:16,31,56`, `src/tests/`
+- **First raised:** review-2 (2026-11-21)
+- **Description:** triplicated stream-redirect code; tests split by capture path; fixtures defined in conftest.
+- **Recommendation:** decided 2026-11-21: add `logit.redirect_streams()`; keep the test split and record it in AGENTS.md; move the fixtures to `src/tests/fixtures/base.py`.
+
+A17 (`src/logit/__init__.py`), the six A19 handlers and T1 (`bin/demo-logging.py::log_messages`) were dismissed in the ledger on 2026-11-21.
 
 ## Recently resolved
 
 | Finding | Severity | Raised in | Resolved in |
 |---------|----------|-----------|-------------|
-| (none yet) | | | |
+| `disabled` state diverges across repeated `setup_logger` calls | high | review-1 | review-2 |
+| Dead `LoguruHandler` class | medium | review-1 | review-2 |
+| Leading-underscore attribute `StreamToLogger._level` | medium | review-1 | review-2 |
+| Silent broad `except` around `linecache.getline` | medium | review-1 | review-2 |
+| Missing type annotations | medium | review-1 | review-2 |
+| `from loguru import logger` violates the full-import-path rule | medium | review-1 | review-2 |
+| README does not describe the project or its API | medium | review-1 | review-2 |
+| Unaccepted mechanical hits needing accept markers | low | review-1 | review-2 |
+| Low-severity remainder (A1, A15, A14/P3, A17, T2, D2) | low | review-1 | review-2 |
 
 ## Recurring patterns
 
-- (none yet - first review)
+- AGENTS.md's tools list falls behind the declared dependencies and hooks (reviews 1, 2)
 
-## Script coverage backlog
+## Checker changes since the last review
 
-- (empty)
-
-## Checker changes since review-1
-
-- **`translator-envelope-gap`** (2026-08-16) - a function whose only error
-  envelope is a translating decorator or a `with` block over a translating
-  contextmanager, where that envelope's except tuple omits a branch of A2's
-  locked set the body triggers. Shipped from the skill's `requests.md`.
-  Catch-up surface here: **zero**.
+- (none since review-2)
