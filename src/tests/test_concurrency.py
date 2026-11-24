@@ -27,7 +27,7 @@ def child_entrypoint(directory: str, label: str) -> None:
     loguru.logger.complete()
 
 
-def child_records(directory: pathlib.Path) -> dict[int, list[dict]]:
+def child_records(directory: pathlib.Path) -> dict[int, list[dict[str, typing.Any]]]:
     """Every log-<pid>.jsonl in the directory, keyed by pid."""
     by_pid = {}
     for path in sorted(directory.glob('log-*.jsonl')):
